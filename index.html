@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lọc Email</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #f5f6fa;
+    --surface: #ffffff;
+    --border:  #e3e6ef;
+    --border2: #cdd1e0;
+    --alive:   #0fa968;
+    --alive-bg:#edfbf4;
+    --dead:    #e03e52;
+    --dead-bg: #fff0f2;
+    --warn:    #d97706;
+    --warn-bg: #fffbeb;
+    --text:    #1a1d2e;
+    --sub:     #6b7195;
+    --muted:   #a0a5c0;
+    --accent:  #4f46e5;
+    --accent-l:#ede9fe;
+    --item-h:  38px;
+    --radius:  10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Be Vietnam Pro', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Layout ── */
+  .wrapper { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  /* ── Header ── */
+  .header-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .logo { font-size: 1.5rem; font-weight: 700; color: var(--text); letter-spacing: -0.03em; }
+  .logo em { font-style: normal; color: var(--accent); }
+  .logo-sub { font-size: 0.75rem; color: var(--sub); font-weight: 400; margin-top: 2px; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+  .card-title {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--sub); margin-bottom: 1rem;
+  }
+
+  /* ── Stats bar ── */
+  .stats-row { display: flex; gap: 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); }
+  .stat-item { flex: 1; padding: 1rem 1.25rem; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
+  .stat-item:last-child { border-right: none; }
+  .stat-label { font-size: 0.68rem; font-weight: 500; color: var(--sub); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-val { font-size: 1.6rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .stat-val.v-total  { color: var(--accent); }
+  .stat-val.v-passed { color: var(--alive); }
+  .stat-val.v-failed { color: var(--dead); }
+  .stat-val.v-rate   { color: var(--warn); }
+  .progress-wrap { height: 4px; background: #e9ebf5; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; border: 1px solid var(--border); border-top: none; }
+  .progress-fill { height: 100%; background: var(--alive); border-radius: 2px; transition: width 0.5s ease; }
+
+  /* ── Two col ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  @media(max-width:680px){ .two-col { grid-template-columns: 1fr; } }
+
+  /* ── Tabs ── */
+  .tab-bar { display: flex; gap: 0.35rem; margin-bottom: 0.75rem; }
+  .tab-btn {
+    font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.75rem; font-weight: 600;
+    padding: 0.4rem 0.85rem; border-radius: 6px; border: 1px solid var(--border);
+    cursor: pointer; background: transparent; color: var(--sub); transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab-btn:hover:not(.active) { border-color: var(--border2); color: var(--text); }
+  .tab-content { display: none; flex-direction: column; gap: 0.75rem; }
+  .tab-content.active { display: flex; }
+
+  /* ── Upload ── */
+  .drop-zone {
+    border: 2px dashed var(--border2); border-radius: 8px;
+    padding: 1.5rem; text-align: center; cursor: pointer;
+    transition: all 0.2s; position: relative; background: var(--bg);
+  }
+  .drop-zone:hover, .drop-zone.over { border-color: var(--accent); background: var(--accent-l); }
+  .drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+  .drop-text { font-size: 0.78rem; color: var(--sub); }
+  .drop-text strong { color: var(--accent); }
+  .file-info { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--alive); margin-top: 0.35rem; min-height: 1em; }
+  .bar-wrap { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; display: none; margin-top: 0.5rem; }
+  .bar-wrap.on { display: block; }
+  .bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s; }
+
+  /* ── Textarea ── */
+  textarea {
+    width: 100%; min-height: 195px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.76rem;
+    line-height: 1.75; padding: 0.85rem 1rem; resize: vertical; outline: none;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
+  textarea::placeholder { color: var(--muted); }
+
+  /* ── Options ── */
+  .options { display: flex; gap: 1rem; flex-wrap: wrap; }
+  label.opt {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.75rem; font-weight: 500; color: var(--sub); cursor: pointer;
+  }
+  label.opt:hover { color: var(--text); }
+  label.opt input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; }
+
+  /* ── Col hint ── */
+  .col-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; font-size: 0.73rem; color: var(--sub); }
+  .col-row select {
+    font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.73rem;
+    border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px;
+    background: var(--bg); color: var(--text); outline: none;
+  }
+  .col-ok { color: var(--alive); font-weight: 500; }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: 0.6rem; }
+  .btn {
+    font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.78rem; font-weight: 600;
+    border: none; border-radius: 7px; padding: 0.6rem 1.25rem; cursor: pointer;
+    transition: all 0.15s; display: flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-primary { background: var(--accent); color: #fff; flex: 1; justify-content: center; }
+  .btn-primary:hover:not(:disabled) { background: #4338ca; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--sub); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+  .btn-sm {
+    font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.68rem; font-weight: 600;
+    padding: 0.28rem 0.65rem; border-radius: 5px; border: 1px solid var(--border);
+    background: transparent; color: var(--sub); cursor: pointer; transition: all 0.15s;
+  }
+  .btn-sm:hover { border-color: var(--alive); color: var(--alive); }
+
+  /* ── Keyword chip ── */
+  .kw-chip {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: var(--warn-bg); border: 1px solid #fcd34d;
+    color: var(--warn); border-radius: 6px; font-size: 0.72rem; font-weight: 600;
+    padding: 0.3rem 0.7rem; cursor: pointer; transition: all 0.15s;
+  }
+  .kw-chip:hover { background: #fef3c7; }
+
+  /* ── Output panel ── */
+  .out-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
+  .out-title { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sub); }
+  .out-actions { display: flex; gap: 0.4rem; align-items: center; }
+
+  .out-box {
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--bg); height: 300px; overflow-y: auto; position: relative;
+  }
+  .vs-inner { position: relative; width: 100%; }
+  .vs-win { position: absolute; top: 0; left: 0; right: 0; }
+
+  .email-row {
+    height: var(--item-h); padding: 0 0.9rem;
+    display: flex; align-items: center; gap: 0.6rem;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.73rem;
+    color: var(--text);
+  }
+  .email-row:last-child { border-bottom: none; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--alive); }
+  .eaddr { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .empty-box {
+    height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0.4rem;
+    color: var(--muted); font-size: 0.75rem;
+  }
+  .empty-box .icon { font-size: 1.5rem; }
+
+  /* ── Bị loại summary ── */
+  .rejected-summary {
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  }
+  .rejected-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+  }
+  .rejected-row:last-child { border-bottom: none; }
+  .rej-email { font-family: 'JetBrains Mono', monospace; color: var(--sub); font-size: 0.7rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rej-reason { font-size: 0.65rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-left: 0.5rem; }
+  .rej-reason.fmt  { background: var(--dead-bg); color: var(--dead); }
+  .rej-reason.kw   { background: var(--warn-bg); color: var(--warn); }
+
+  .show-more { text-align: center; padding: 0.5rem; font-size: 0.7rem; color: var(--sub); cursor: pointer; border-top: 1px solid var(--border); }
+  .show-more:hover { color: var(--accent); }
+
+  /* ── Processing ── */
+  .busy { font-size: 0.73rem; font-weight: 500; color: var(--accent); display: none; animation: blink 1s infinite; }
+  .busy.on { display: inline; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── Modal ── */
+  .overlay { position: fixed; inset: 0; background: rgba(15,15,30,0.45); z-index: 100; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; max-width: 580px; width: 100%; max-height: 80vh; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; }
+  .modal-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .modal-close { font-size: 1rem; cursor: pointer; color: var(--sub); background: none; border: none; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+  .modal-close:hover { background: var(--bg); color: var(--text); }
+  .modal-note { font-size: 0.73rem; color: var(--sub); }
+  .kw-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; overflow-y: auto; padding: 2px; }
+  .kw-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 500;
+    padding: 3px 9px; border-radius: 5px;
+    background: var(--warn-bg); border: 1px solid #fcd34d; color: var(--warn);
+    cursor: pointer; transition: all 0.15s; user-select: none;
+  }
+  .kw-tag:hover { background: #fef3c7; }
+  .kw-tag.off { background: var(--bg); border-color: var(--border); color: var(--muted); text-decoration: line-through; }
+  .modal-foot { display: flex; gap: 0.5rem; }
+  .btn-outline { font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.72rem; font-weight: 600; padding: 0.4rem 0.9rem; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--sub); cursor: pointer; }
+  .btn-outline:hover { border-color: var(--border2); color: var(--text); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  .badge {
+    display: inline-flex; align-items: center;
+    font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  }
+  .badge-green { background: var(--alive-bg); color: var(--alive); }
+  .badge-red   { background: var(--dead-bg);  color: var(--dead); }
+  .badge-blue  { background: var(--accent-l); color: var(--accent); }
+
+  /* ── Domain filter bar ── */
+  .filter-bar {
+    display: flex; align-items: center; gap: 0.4rem;
+    flex-wrap: wrap; padding: 0.6rem 0.85rem;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; margin-bottom: 0.75rem;
+  }
+  .filter-label { font-size: 0.68rem; font-weight: 600; color: var(--sub); margin-right: 0.2rem; white-space: nowrap; }
+  .f-btn {
+    font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.7rem; font-weight: 600;
+    padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--sub); cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 0.3rem; white-space: nowrap;
+  }
+  .f-btn:hover { border-color: var(--border2); color: var(--text); }
+  .f-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .f-btn .fc { font-size: 0.6rem; opacity: 0.8; background: rgba(255,255,255,0.25); padding: 0 4px; border-radius: 8px; }
+  .f-btn:not(.on) .fc { background: var(--border); color: var(--sub); opacity: 1; }
+  .f-sep { width: 1px; height: 16px; background: var(--border); flex-shrink: 0; }
+  .f-search {
+    flex: 1; min-width: 100px; max-width: 160px;
+    font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.72rem;
+    border: 1px solid var(--border); border-radius: 20px; padding: 0.25rem 0.7rem;
+    background: var(--surface); color: var(--text); outline: none; transition: border-color 0.2s;
+  }
+  .f-search:focus { border-color: var(--accent); }
+  .f-search::placeholder { color: var(--muted); }
+  .f-result { font-size: 0.68rem; color: var(--sub); margin-left: auto; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header-row">
+    <div>
+      <div class="logo">Lọc <em>Email</em></div>
+      <div class="logo-sub">Kiểm tra định dạng · Lọc từ khoá · Xuất CSV</div>
+    </div>
+    <span class="kw-chip" onclick="openModal()">
+      🚫 <span id="kw-count">178</span> từ khoá đang bật · Quản lý
+    </span>
+  </div>
+
+  <!-- Stats -->
+  <div>
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">Tổng đầu vào</span>
+        <span class="stat-val v-total" id="s-total">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Hợp lệ</span>
+        <span class="stat-val v-passed" id="s-alive">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Bị loại</span>
+        <span class="stat-val v-failed" id="s-dead">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Tỉ lệ lọt</span>
+        <span class="stat-val v-rate" id="s-rate">—</span>
+      </div>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="s-bar" style="width:0%"></div></div>
+  </div>
+
+  <!-- Main two col -->
+  <div class="two-col">
+
+    <!-- LEFT: Input -->
+    <div class="card">
+      <div class="card-title">Dữ liệu đầu vào</div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('paste')">✏️ Dán text</button>
+        <button class="tab-btn" onclick="switchTab('csv')">📂 Upload CSV</button>
+      </div>
+
+      <!-- Paste -->
+      <div class="tab-content active" id="tab-paste">
+        <textarea id="input-emails" placeholder="Dán danh sách email vào đây&#10;Mỗi dòng một email&#10;&#10;example@gmail.com&#10;user@company.vn&#10;..."></textarea>
+        <div style="font-size:0.7rem;color:var(--muted)" id="paste-count">0 dòng</div>
+      </div>
+
+      <!-- CSV -->
+      <div class="tab-content" id="tab-csv">
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="csv-file" accept=".csv,.txt" onchange="handleFile(this)">
+          <div class="drop-icon">📁</div>
+          <div class="drop-text">Kéo thả <strong>CSV / TXT</strong> vào đây<br>hoặc click để chọn file</div>
+          <div class="file-info" id="file-info"></div>
+        </div>
+        <div class="bar-wrap" id="bar-wrap"><div class="bar-fill" id="bar-fill"></div></div>
+        <div class="col-row">
+          <span>Cột email:</span>
+          <select id="col-sel"><option value="auto">Tự động nhận diện</option></select>
+          <span class="col-ok" id="col-ok"></span>
+        </div>
+      </div>
+
+      <div class="options">
+        <label class="opt"><input type="checkbox" id="opt-trim" checked> Bỏ khoảng trắng</label>
+        <label class="opt"><input type="checkbox" id="opt-dedup" checked> Loại trùng lặp</label>
+        <label class="opt"><input type="checkbox" id="opt-lower" checked> Chuyển thường</label>
+        <label class="opt"><input type="checkbox" id="opt-kw" checked> Lọc từ khoá</label>
+      </div>
+
+      <span class="busy" id="busy">⏳ Đang xử lý...</span>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="run-btn" onclick="run()">⚡ Chạy lọc</button>
+        <button class="btn btn-ghost" onclick="clearAll()">Xoá sạch</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Output -->
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+
+      <!-- Hợp lệ -->
+      <div class="card" style="flex:1">
+        <div class="out-header">
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <span class="out-title">Email hợp lệ</span>
+            <span class="badge badge-green" id="alive-badge">0</span>
+          </div>
+          <div class="out-actions">
+            <button class="btn-sm" id="btn-copy" onclick="copyAlive()">⎘ Sao chép</button>
+            <button class="btn-sm" onclick="downloadAlive()">⬇ Tải CSV</button>
+          </div>
+        </div>
+
+        <!-- Domain filter bar -->
+        <div class="filter-bar">
+          <span class="filter-label">Lọc:</span>
+          <button class="f-btn on" id="fb-all"     onclick="setFilter('all')">    Tất cả  <span class="fc" id="fc-all">0</span></button>
+          <button class="f-btn"    id="fb-gmail"   onclick="setFilter('gmail')">  Gmail   <span class="fc" id="fc-gmail">0</span></button>
+          <button class="f-btn"    id="fb-outlook" onclick="setFilter('outlook')">Outlook <span class="fc" id="fc-outlook">0</span></button>
+          <button class="f-btn"    id="fb-yahoo"   onclick="setFilter('yahoo')">  Yahoo   <span class="fc" id="fc-yahoo">0</span></button>
+          <button class="f-btn"    id="fb-other"   onclick="setFilter('other')">  Khác    <span class="fc" id="fc-other">0</span></button>
+          <div class="f-sep"></div>
+          <input class="f-search" id="f-search" placeholder="Tìm domain..." oninput="onSearchInput(this.value)">
+          <span class="f-result" id="f-result"></span>
+        </div>
+
+        <div class="out-box" id="alive-box" onscroll="vsScroll()">
+          <div class="vs-inner" id="alive-inner" style="height:120px">
+            <div class="vs-win" id="alive-win">
+              <div class="empty-box"><div class="icon">📭</div><div>Chưa có dữ liệu</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bị loại: chỉ tải CSV, không hiển thị -->
+      <div class="card" style="flex-direction:row;align-items:center;justify-content:space-between;padding:0.9rem 1.25rem;">
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <span class="out-title">Bị loại</span>
+          <span class="badge badge-red" id="dead-badge">0</span>
+        </div>
+        <button class="btn-sm" onclick="downloadDead()">⬇ Tải CSV danh sách bị loại</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal quản lý từ khoá -->
+<div class="overlay" id="overlay" onclick="outsideClose(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">🚫 Quản lý từ khoá loại trừ</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-note">
+      Từ khoá <strong style="color:var(--warn)">đang bật</strong> sẽ loại email có chứa từ đó trong phần local (trước @).<br>
+      Click để <strong>bật / tắt</strong> từng từ khoá.
+    </div>
+    <div class="kw-grid" id="kw-grid"></div>
+    <div class="modal-foot">
+      <button class="btn-outline" onclick="allKw(true)">✅ Bật tất cả</button>
+      <button class="btn-outline" onclick="allKw(false)">⬜ Tắt tất cả</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Keywords ──────────────────────────────────────────────────
+const ALL_KW = ["&",".sg","7x","8x","9x","abc","acb","acc","ae","agri","angle","aoc","appl","bab","bachtuyet","bad","beau","bee","ben","best","bl","bongdem","botbi","boy","bs","bup","caf","cart","cau","chang","chim","chip","chis","chua","cobe","congty","cont","contact","cotech","credit","cry","cskh","ctcp","ctt","ctx","cty","cute","dautu","des","det","dienlanh","dienmay","dient","dientu","doi","dulich","edu","er","ey","fa","gai","galaxy","game","gau","giangsinh","giare","girl","hack","hak","hanhphuc","hee","heo","hero","hihi","hoahau","hoc","hope","hot","hotel","hotl","ieu","ii","info","iu","j","jsc","k5","ka","ke","khung","kiss","kk","ko","ku","lala","lambor","land","langt","lee","lov","lucky","lux","mart","max","may","meo","minion","mkt","mobi","mp3","mr","msb","muadong","muathu","muaxuan","mypham","net","ngau","ngois","nhoc","niem","no.1","no1","noith","nok","ok","online","oo","ox","pa","pe","phar","pr","quak","rap","rk","robert","saigon","sale","sao","sex","shop","sil","sky","sport","ss","store","studio","taichinh","tea","tee","thietb","thietbi","tks","tmdt","toiac","top","trai","troi","tspt","tuoith","tuvan","uid","ute","vip","vui","xaydung","xinh","xnk","xuong","xx","xyz","ya","yeu","yr","yu","zai","zip"];
+const kwOn = {};
+ALL_KW.forEach(k => kwOn[k] = true);
+
+function activeKw() { return ALL_KW.filter(k => kwOn[k]); }
+function updateChip() { document.getElementById('kw-count').textContent = activeKw().length; }
+
+// ── Modal ─────────────────────────────────────────────────────
+function openModal() {
+  const g = document.getElementById('kw-grid');
+  g.innerHTML = ALL_KW.map(k =>
+    `<span class="kw-tag ${kwOn[k]?'':'off'}" id="kt-${k}" onclick="toggleKw('${k}')">${k}</span>`
+  ).join('');
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); updateChip(); }
+function outsideClose(e) { if(e.target.id==='overlay') closeModal(); }
+function toggleKw(k) { kwOn[k]=!kwOn[k]; const el=document.getElementById('kt-'+k); if(el) el.classList.toggle('off',!kwOn[k]); }
+function allKw(v) { ALL_KW.forEach(k=>{ kwOn[k]=v; const el=document.getElementById('kt-'+k); if(el) el.classList.toggle('off',!v); }); }
+
+// ── Tabs ──────────────────────────────────────────────────────
+function switchTab(n) {
+  ['paste','csv'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('active',t===n));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['paste','csv'][i]===n));
+}
+
+// ── CSV Upload ────────────────────────────────────────────────
+let csvRows=[], csvHeaders=[];
+const dz=document.getElementById('drop-zone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files[0])processFile(e.dataTransfer.files[0]);});
+function handleFile(i){if(i.files[0])processFile(i.files[0]);}
+
+function processFile(file){
+  document.getElementById('file-info').textContent='📄 '+file.name+' · '+fmt(file.size);
+  const bw=document.getElementById('bar-wrap'),bf=document.getElementById('bar-fill');
+  bw.classList.add('on');bf.style.width='0%';
+  const r=new FileReader();
+  r.onprogress=e=>{if(e.lengthComputable)bf.style.width=(e.loaded/e.total*85)+'%';};
+  r.onload=e=>{bf.style.width='100%';setTimeout(()=>bw.classList.remove('on'),400);parseCSV(e.target.result);};
+  r.readAsText(file,'UTF-8');
+}
+function parseCSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());if(!lines.length)return;
+  const ds=[',',';','\t','|'],cnts=ds.map(d=>(lines[0].match(new RegExp('\\'+d,'g'))||[]).length);
+  const d=ds[cnts.indexOf(Math.max(...cnts))];
+  const first=sl(lines[0],d),hasH=first.some(c=>/email|mail/i.test(c));
+  csvHeaders=hasH?first:first.map((_,i)=>'Cột '+(i+1));
+  csvRows=lines.slice(hasH?1:0).map(l=>sl(l,d));
+  const sel=document.getElementById('col-sel');
+  sel.innerHTML='<option value="auto">Tự động nhận diện</option>';
+  csvHeaders.forEach((h,i)=>{const o=document.createElement('option');o.value=i;o.textContent=h+' (cột '+(i+1)+')';if(/email|mail/i.test(h))o.selected=true;sel.appendChild(o);});
+  document.getElementById('col-ok').textContent='✓ '+csvRows.length.toLocaleString()+' dòng';
+}
+function sl(line,d){
+  const r=[];let cur='',q=false;
+  for(const ch of line){if(ch==='"'){q=!q;}else if(ch===d&&!q){r.push(cur.trim());cur='';}else{cur+=ch;}}
+  r.push(cur.trim());return r;
+}
+function fmt(b){return b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(1)+'MB';}
+
+// ── Validation ────────────────────────────────────────────────
+const DISPOSABLE=new Set(['mailinator.com','guerrillamail.com','temp-mail.org','throwam.com','yopmail.com','sharklasers.com','grr.la','guerrillamail.info','guerrillamail.biz','guerrillamail.de','guerrillamail.net','guerrillamail.org','spam4.me','trashmail.com','trashmail.me','trashmail.net','dispostable.com','maildrop.cc','mailnull.com','spamgourmet.com','mytemp.email','fakeinbox.com','tempmail.com','tempinbox.com','getairmail.com','discard.email','wegwerfmail.de','mailtemp.net']);
+
+function validate(raw){
+  const trim=document.getElementById('opt-trim').checked, lower=document.getElementById('opt-lower').checked;
+  let e=trim?raw.trim():raw; if(lower)e=e.toLowerCase();
+  if(!e)return{email:e,ok:false,reason:'Dòng trống',kw:false};
+  const at=e.lastIndexOf('@');
+  if(at<1)            return{email:e,ok:false,reason:'Thiếu @',kw:false};
+  if(at===e.length-1) return{email:e,ok:false,reason:'Thiếu domain',kw:false};
+  const loc=e.slice(0,at),dom=e.slice(at+1);
+  if(loc.length>64)   return{email:e,ok:false,reason:'Local quá dài',kw:false};
+  if(dom.length>253)  return{email:e,ok:false,reason:'Domain quá dài',kw:false};
+  if(/^[.\-_]/.test(loc)||/[.\-_]$/.test(loc)) return{email:e,ok:false,reason:'Local bắt đầu/kết thúc ký tự đặc biệt',kw:false};
+  if(/\.{2,}/.test(loc)) return{email:e,ok:false,reason:'Dấu chấm liên tiếp',kw:false};
+  if(!/^[a-zA-Z0-9._%+\-]+$/.test(loc)) return{email:e,ok:false,reason:'Ký tự không hợp lệ',kw:false};
+  if(!dom.includes('.')) return{email:e,ok:false,reason:'Thiếu TLD',kw:false};
+  const pts=dom.split('.'),tld=pts[pts.length-1];
+  if(tld.length<2||tld.length>24) return{email:e,ok:false,reason:'TLD không hợp lệ',kw:false};
+  if(!/^[a-zA-Z0-9.\-]+$/.test(dom)) return{email:e,ok:false,reason:'Ký tự không hợp lệ (domain)',kw:false};
+  if(/^-|-$/.test(pts[0])) return{email:e,ok:false,reason:'Domain bắt đầu/kết thúc gạch ngang',kw:false};
+  if(DISPOSABLE.has(dom.toLowerCase())) return{email:e,ok:false,reason:'Email tạm thời / rác',kw:false};
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)) return{email:e,ok:false,reason:'Sai định dạng',kw:false};
+  if(document.getElementById('opt-kw').checked){
+    const lc=loc.toLowerCase();
+    for(const k of activeKw()){if(lc.includes(k))return{email:e,ok:false,reason:'Từ khoá: "'+k+'"',kw:true};}
+  }
+  return{email:e,ok:true,reason:null,kw:false};
+}
+
+// ── Run ───────────────────────────────────────────────────────
+let aliveList=[], deadList=[];
+
+const inputEl=document.getElementById('input-emails');
+inputEl.addEventListener('input',()=>{
+  document.getElementById('paste-count').textContent=inputEl.value.split('\n').filter(l=>l.trim()).length+' dòng';
+});
+
+function getLines(){
+  if(document.getElementById('tab-csv').classList.contains('active')){
+    if(!csvRows.length)return[];
+    const sel=document.getElementById('col-sel');
+    let ci;
+    if(sel.value==='auto'){
+      const sc=csvHeaders.map((_,i)=>csvRows.reduce((a,r)=>a+((r[i]||'').includes('@')?1:0),0));
+      ci=sc.indexOf(Math.max(...sc));
+    } else ci=parseInt(sel.value);
+    return csvRows.map(r=>r[ci]||'');
+  }
+  return inputEl.value.split('\n');
+}
+
+function run(){
+  const btn=document.getElementById('run-btn'),busy=document.getElementById('busy');
+  btn.disabled=true; busy.classList.add('on');
+  setTimeout(()=>{
+    let results=getLines().map(validate).filter(r=>r.email!=='');
+    if(document.getElementById('opt-dedup').checked){
+      const seen=new Set();
+      results=results.filter(r=>{if(seen.has(r.email))return false;seen.add(r.email);return true;});
+    }
+    aliveList=results.filter(r=>r.ok);
+    deadList =results.filter(r=>!r.ok);
+    renderAlive();
+    updateStats();
+    btn.disabled=false; busy.classList.remove('on');
+  },20);
+}
+
+// ── Domain filter ─────────────────────────────────────────────
+let activeFilter = 'all';
+let searchDomain = '';
+
+const FILTER_DOMAINS = {
+  gmail:   ['gmail.com'],
+  outlook: ['outlook.com','hotmail.com','live.com','msn.com'],
+  yahoo:   ['yahoo.com','yahoo.com.vn','ymail.com']
+};
+
+function getDomain(email) { return (email.split('@')[1]||'').toLowerCase(); }
+
+function getFilteredList() {
+  return aliveList.filter(r => {
+    const dom = getDomain(r.email);
+    if (searchDomain) return dom.includes(searchDomain.toLowerCase());
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'other') return !Object.values(FILTER_DOMAINS).flat().some(d => dom === d);
+    return (FILTER_DOMAINS[activeFilter]||[]).some(d => dom === d);
+  });
+}
+
+function setFilter(name) {
+  activeFilter = name; searchDomain = '';
+  document.getElementById('f-search').value = '';
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('on'));
+  document.getElementById('fb-'+name).classList.add('on');
+  renderAlive();
+}
+
+function onSearchInput(val) {
+  searchDomain = val.trim();
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('on'));
+  if (!searchDomain) { activeFilter='all'; document.getElementById('fb-all').classList.add('on'); }
+  else activeFilter = '';
+  renderAlive();
+}
+
+function updateFilterCounts() {
+  const c = { all: aliveList.length, gmail:0, outlook:0, yahoo:0, other:0 };
+  aliveList.forEach(r => {
+    const dom = getDomain(r.email);
+    let matched = false;
+    for (const [k,ds] of Object.entries(FILTER_DOMAINS)) {
+      if (ds.some(d => dom===d)) { c[k]++; matched=true; }
+    }
+    if (!matched) c.other++;
+  });
+  for (const k of ['all','gmail','outlook','yahoo','other'])
+    document.getElementById('fc-'+k).textContent = c[k];
+}
+
+// ── Virtual scroll ────────────────────────────────────────────
+const IH=38, BUF=12;
+
+function renderAlive(){
+  const box=document.getElementById('alive-box'), inner=document.getElementById('alive-inner'), win=document.getElementById('alive-win');
+  const list = getFilteredList();
+  const fResult = document.getElementById('f-result');
+  if(!aliveList.length){
+    inner.style.height='120px'; win.style.top='0px';
+    win.innerHTML='<div class="empty-box"><div class="icon">📭</div><div>Chưa có dữ liệu</div></div>';
+    box.scrollTop=0; fResult.textContent=''; return;
+  }
+  if(!list.length){
+    inner.style.height='80px'; win.style.top='0px';
+    win.innerHTML='<div class="empty-box"><div>Không tìm thấy</div></div>';
+    fResult.textContent='0 kết quả'; return;
+  }
+  const isFiltered = searchDomain || (activeFilter && activeFilter!=='all');
+  fResult.textContent = isFiltered ? list.length.toLocaleString()+' kết quả' : '';
+  inner.style.height=(list.length*IH)+'px';
+  box.scrollTop=0; paintAlive(list,0);
+}
+
+function paintAlive(list,scrollTop){
+  if(!list) list=getFilteredList();
+  const win=document.getElementById('alive-win');
+  const s=Math.max(0,Math.floor(scrollTop/IH)-BUF);
+  const e=Math.min(list.length,Math.ceil((scrollTop+300)/IH)+BUF);
+  win.style.top=(s*IH)+'px';
+  win.innerHTML=list.slice(s,e).map(item=>
+    `<div class="email-row"><div class="dot"></div><span class="eaddr">${esc(item.email)}</span></div>`
+  ).join('');
+}
+function vsScroll(){
+  const box=document.getElementById('alive-box'), list=getFilteredList();
+  if(list.length) paintAlive(list,box.scrollTop);
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+function updateStats(){
+  const a=aliveList.length,d=deadList.length,t=a+d,r=t?Math.round(a/t*100):0;
+  document.getElementById('s-total').textContent=t.toLocaleString();
+  document.getElementById('s-alive').textContent=a.toLocaleString();
+  document.getElementById('s-dead').textContent =d.toLocaleString();
+  document.getElementById('s-rate').textContent =t?r+'%':'—';
+  document.getElementById('s-bar').style.width  =r+'%';
+  document.getElementById('alive-badge').textContent=a.toLocaleString();
+  document.getElementById('dead-badge').textContent =d.toLocaleString();
+  updateFilterCounts();
+}
+
+// ── Export ────────────────────────────────────────────────────
+function copyAlive(){
+  const list=getFilteredList(); if(!list.length)return;
+  navigator.clipboard.writeText(list.map(r=>r.email).join('\n')).then(()=>{
+    const btn=document.getElementById('btn-copy');
+    const old=btn.textContent; btn.textContent='✓ Đã sao chép!';
+    setTimeout(()=>btn.textContent=old,1500);
+  });
+}
+function downloadAlive(){
+  const list=getFilteredList(); if(!list.length)return;
+  const tag=searchDomain||( activeFilter&&activeFilter!=='all'?activeFilter:'hop_le');
+  dl('email\n'+list.map(r=>r.email).join('\n'),'email_'+tag+'_'+Date.now()+'.csv');
+}
+function downloadDead(){
+  if(!deadList.length)return;
+  dl('email,ly_do\n'+deadList.map(r=>r.email+','+r.reason).join('\n'),'email_bi_loai_'+Date.now()+'.csv');
+}
+function dl(content,name){
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([content],{type:'text/csv'})),download:name});
+  a.click();
+}
+
+function clearAll(){
+  inputEl.value=''; csvRows=[]; csvHeaders=[]; aliveList=[]; deadList=[];
+  activeFilter='all'; searchDomain='';
+  document.getElementById('f-search').value='';
+  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('fb-all').classList.add('on');
+  document.getElementById('f-result').textContent='';
+  document.getElementById('paste-count').textContent='0 dòng';
+  document.getElementById('file-info').textContent='';
+  document.getElementById('col-ok').textContent='';
+  document.getElementById('col-sel').innerHTML='<option value="auto">Tự động nhận diện</option>';
+  renderAlive(); updateStats();
+}
+
+function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Demo
+inputEl.value=['nguyen.van.a@gmail.com','tran.thi.b@yahoo.com','valid@company.vn','user@outlook.com','good@startup.io','hello@world.org','tester@hotmail.com','nguyen@live.com','info@brand.vn'].join('\n');
+inputEl.dispatchEvent(new Event('input'));
+run();
+</script>
+</body>
+</html>
