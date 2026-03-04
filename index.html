@@ -287,9 +287,14 @@ label.opt input[type=checkbox] { accent-color: var(--accent); width: 14px; heigh
       <div class="logo">Lọc <span class="hi">Email</span> <span class="h2">Pro</span><span class="logo-badge">v2.0</span></div>
       <div class="logo-sub">Giữ Tên + Email · Lọc từ khoá · Xuất CSV sẵn gửi</div>
     </div>
-    <span class="kw-chip" onclick="openModal()">
-      🚫 <span id="kw-count">178</span> từ khoá bật · Quản lý
-    </span>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <span class="kw-chip" onclick="openModal('kw')">
+        🚫 <span id="kw-count">178</span> từ khoá · Quản lý
+      </span>
+      <span class="kw-chip" style="background:#fff0f2;border-color:#fca5a5;color:#e03e52;" onclick="openModal('bounce')">
+        ⛔ <span id="bounce-count">0</span> bounce · Quản lý
+      </span>
+    </div>
   </div>
 
   <!-- Stats -->
@@ -358,6 +363,7 @@ label.opt input[type=checkbox] { accent-color: var(--accent); width: 14px; heigh
         <label class="opt"><input type="checkbox" id="opt-dedup" checked> Loại trùng lặp</label>
         <label class="opt"><input type="checkbox" id="opt-lower" checked> Chuyển thường</label>
         <label class="opt"><input type="checkbox" id="opt-kw" checked> Lọc từ khoá</label>
+        <label class="opt"><input type="checkbox" id="opt-bounce" checked> Loại bounce</label>
       </div>
 
       <span class="busy" id="busy">⏳ Đang xử lý...</span>
@@ -442,6 +448,32 @@ label.opt input[type=checkbox] { accent-color: var(--accent); width: 14px; heigh
   </div>
 </div>
 
+<!-- Modal bounce list -->
+<div class="overlay" id="overlay-bounce" onclick="outsideBounceClose(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">⛔ Danh sách Mail Bounce</span>
+      <button class="modal-close" onclick="closeBounceModal()">✕</button>
+    </div>
+    <div class="modal-note">
+      Mỗi email một dòng. Các email này sẽ bị loại khỏi kết quả khi chạy lọc.<br>
+      <strong style="color:var(--dead)">Paste thẳng danh sách bounce</strong> từ ESP (Mailchimp, Brevo...) vào đây.
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem">
+      <span class="kw-stats">Đang có: <strong id="bounce-edit-count">0</strong> email bounce</span>
+      <div style="display:flex;gap:0.4rem">
+        <button class="btn-outline" onclick="sortBounce()">↕ Sắp xếp A-Z</button>
+        <button class="btn-outline" onclick="clearBounce()">🗑 Xoá tất cả</button>
+      </div>
+    </div>
+    <textarea class="kw-edit" id="bounce-edit" placeholder="Dán danh sách bounce vào đây&#10;&#10;badmail@example.com&#10;bounced@domain.vn&#10;invalid@test.com&#10;..." oninput="onBounceEdit()"></textarea>
+    <div class="modal-foot">
+      <button class="btn-outline" onclick="closeBounceModal()">✕ Đóng</button>
+      <button class="btn-primary btn" style="flex:1;justify-content:center;background:var(--dead);box-shadow:0 2px 10px rgba(224,62,82,0.25)" onclick="applyBounce()">✅ Áp dụng bounce list</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Keywords ──────────────────────────────────────────────────
 const DEFAULT_KW = ["&",".sg","7x","8x","9x","abc","acb","acc","ae","agri","angle","aoc","appl","bab","bachtuyet","bad","beau","bee","ben","best","bl","bongdem","botbi","boy","bs","bup","caf","cart","cau","chang","chim","chip","chis","chua","cobe","congty","cont","contact","cotech","credit","cry","cskh","ctcp","ctt","ctx","cty","cute","dautu","des","det","dienlanh","dienmay","dient","dientu","doi","dulich","edu","er","ey","fa","gai","galaxy","game","gau","giangsinh","giare","girl","hack","hak","hanhphuc","hee","heo","hero","hihi","hoahau","hoc","hope","hot","hotel","hotl","ieu","ii","info","iu","j","jsc","k5","ka","ke","khung","kiss","kk","ko","ku","lala","lambor","land","langt","lee","lov","lucky","lux","mart","max","may","meo","minion","mkt","mobi","mp3","mr","msb","muadong","muathu","muaxuan","mypham","net","ngau","ngois","nhoc","niem","no.1","no1","noith","nok","ok","online","oo","ox","pa","pe","phar","pr","quak","rap","rk","robert","saigon","sale","sao","sex","shop","sil","sky","sport","ss","store","studio","taichinh","tea","tee","thietb","thietbi","tks","tmdt","toiac","top","trai","troi","tspt","tuoith","tuvan","uid","ute","vip","vui","xaydung","xinh","xnk","xuong","xx","xyz","ya","yeu","yr","yu","zai","zip"];
@@ -460,7 +492,8 @@ function kwTextToList(text) {
 }
 
 // ── Modal ──────────────────────────────────────────────────────
-function openModal() {
+function openModal(type) {
+  if (type === 'bounce') { openBounceModal(); return; }
   const ta = document.getElementById('kw-edit');
   ta.value = kwListToText(currentKw);
   updateChip();
@@ -495,6 +528,51 @@ function resetKw() {
 function switchTab(n) {
   ['paste','csv'].forEach(t => document.getElementById('tab-'+t).classList.toggle('active', t===n));
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['paste','csv'][i]===n));
+}
+
+// ── Bounce list ───────────────────────────────────────────────
+let bounceSet = new Set();
+
+function updateBounceChip() {
+  document.getElementById('bounce-count').textContent = bounceSet.size;
+  const el = document.getElementById('bounce-edit-count');
+  if (el) el.textContent = bounceSet.size;
+}
+function bounceListToText(set) { return [...set].sort().join('\n'); }
+function bounceTextToSet(text) {
+  return new Set(
+    text.split(/[\n,]/).map(e=>e.trim().toLowerCase()).filter(e=>e.includes('@'))
+  );
+}
+function openBounceModal() {
+  const ta = document.getElementById('bounce-edit');
+  ta.value = bounceListToText(bounceSet);
+  document.getElementById('bounce-edit-count').textContent = bounceSet.size;
+  document.getElementById('overlay-bounce').classList.add('open');
+  setTimeout(()=>ta.focus(),100);
+}
+function closeBounceModal() {
+  document.getElementById('overlay-bounce').classList.remove('open');
+  updateBounceChip();
+}
+function outsideBounceClose(e) { if(e.target.id==='overlay-bounce') closeBounceModal(); }
+function onBounceEdit() {
+  const set = bounceTextToSet(document.getElementById('bounce-edit').value);
+  document.getElementById('bounce-edit-count').textContent = set.size;
+}
+function applyBounce() {
+  bounceSet = bounceTextToSet(document.getElementById('bounce-edit').value);
+  closeBounceModal();
+}
+function sortBounce() {
+  const ta = document.getElementById('bounce-edit');
+  const sorted = [...bounceTextToSet(ta.value)].sort();
+  ta.value = sorted.join('\n');
+  document.getElementById('bounce-edit-count').textContent = sorted.length;
+}
+function clearBounce() {
+  document.getElementById('bounce-edit').value = '';
+  document.getElementById('bounce-edit-count').textContent = 0;
 }
 
 // ── Paste: auto-detect format ─────────────────────────────────
@@ -628,6 +706,9 @@ function validate(raw, name) {
   if (document.getElementById('opt-kw').checked) {
     const lc = loc.toLowerCase();
     for (const k of activeKw()) { if (lc.includes(k)) return {email:e,name:n,ok:false,reason:'Từ khoá: "'+k+'"',kw:true}; }
+  }
+  if (document.getElementById('opt-bounce').checked && bounceSet.has(e.toLowerCase())) {
+    return {email:e,name:n,ok:false,reason:'Bounce list',kw:false};
   }
   return {email:e,name:n,ok:true,reason:null,kw:false};
 }
