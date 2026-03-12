@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lọc Email Pro — Giữ Tên + Email</title>
+<title>Lọc Email Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -364,6 +364,7 @@ label.opt input[type=checkbox] { accent-color: var(--accent); width: 14px; heigh
         <label class="opt"><input type="checkbox" id="opt-lower" checked> Chuyển thường</label>
         <label class="opt"><input type="checkbox" id="opt-kw" checked> Lọc từ khoá</label>
         <label class="opt"><input type="checkbox" id="opt-bounce" checked> Loại bounce</label>
+        <label class="opt"><input type="checkbox" id="opt-numstart" checked> Loại email bắt đầu bằng số</label>
       </div>
 
       <span class="busy" id="busy">⏳ Đang xử lý...</span>
@@ -36466,6 +36467,25 @@ function slCSV(line, d) {
 }
 function fmtSize(b) { return b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(1)+'MB'; }
 
+// ── Name splitting helper ──────────────────────────────────────
+// Vietnamese: last word = first name (given name), rest = last name
+const FALLBACK_NAMES = ['bạn','anh/chị'];
+let _fallbackIdx = 0;
+function nextFallback() { const v = FALLBACK_NAMES[_fallbackIdx % FALLBACK_NAMES.length]; _fallbackIdx++; return v; }
+function splitName(fullName) {
+  const t = (fullName||'').trim();
+  if (!t) {
+    const fn = nextFallback();
+    return { first: fn, last: '' };
+  }
+  const parts = t.split(/\s+/);
+  if (parts.length === 1) return { first: parts[0], last: '' };
+  // Vietnamese convention: last word = first name (given name)
+  const first = parts[parts.length - 1];
+  const last  = parts.slice(0, parts.length - 1).join(' ');
+  return { first, last };
+}
+
 // ── Validation ─────────────────────────────────────────────────
 const DISPOSABLE = new Set(['mailinator.com','guerrillamail.com','temp-mail.org','throwam.com','yopmail.com','sharklasers.com','grr.la','spam4.me','trashmail.com','trashmail.me','dispostable.com','maildrop.cc','tempmail.com','fakeinbox.com']);
 
@@ -36493,10 +36513,13 @@ function validate(raw, name) {
     const lc = loc.toLowerCase();
     for (const k of activeKw()) { if (lc.includes(k)) return {email:e,name:n,ok:false,reason:'Từ khoá: "'+k+'"',kw:true}; }
   }
+  if (document.getElementById('opt-numstart').checked && /^[0-9]/.test(loc)) {
+    return {email:e,name:n,ok:false,reason:'Email bắt đầu bằng số',kw:false};
+  }
   if (document.getElementById('opt-bounce').checked && bounceSet.has(e.toLowerCase())) {
     return {email:e,name:n,ok:false,reason:'Bounce list',kw:false};
   }
-  return {email:e,name:n,ok:true,reason:null,kw:false};
+  return {email:e,name:n,firstName:splitName(n).first,lastName:splitName(n).last,ok:true,reason:null,kw:false};
 }
 
 // ── Get lines with name ─────────────────────────────────────────
@@ -36636,14 +36659,13 @@ function updateStats() {
 // ── Export ─────────────────────────────────────────────────────
 function copyAlive() {
   const list=getFilteredList(); if(!list.length) return;
-  const hasNames=list.some(r=>r.name);
-  let text;
-  if (hasNames) {
-    // Tab-separated: Email [TAB] Tên → paste thẳng vào Google Sheet thành 2 cột
-    text = list.map(r=>(r.email||'') + '\t' + (r.name||'')).join('\n');
-  } else {
-    text = list.map(r=>r.email).join('\n');
-  }
+  _fallbackIdx = 0;
+  // Tab-separated: Email [TAB] first_name [TAB] last_name → 3 cột trong Google Sheet
+  const text = list.map(r => {
+    const fn = r.firstName || nextFallback();
+    const ln = r.lastName  || '';
+    return (r.email||'') + '\t' + fn + '\t' + ln;
+  }).join('\n');
   navigator.clipboard.writeText(text).then(()=>{
     const btn=document.getElementById('btn-copy'); const old=btn.textContent;
     btn.textContent='✓ Đã sao chép!'; setTimeout(()=>btn.textContent=old,1800);
@@ -36651,19 +36673,19 @@ function copyAlive() {
 }
 function downloadAlive() {
   const list=getFilteredList(); if(!list.length) return;
-  const hasNames=list.some(r=>r.name);
-  let csv;
-  if (hasNames) {
-    csv='email,ten_khach_hang\n'+list.map(r=>csvEscape(r.email)+','+csvEscape(r.name)).join('\n');
-  } else {
-    csv='email\n'+list.map(r=>r.email).join('\n');
-  }
+  _fallbackIdx = 0;
+  const rows = list.map(r => {
+    const fn = r.firstName || nextFallback();
+    const ln = r.lastName  || '';
+    return csvEscape(r.email)+','+csvEscape(fn)+','+csvEscape(ln)+',,';
+  });
+  const csv = 'email,first_name,last_name,company,tag\n' + rows.join('\n');
   const tag=searchDomain||(activeFilter&&activeFilter!=='all'?activeFilter:'hop_le');
   dl(csv,'email_'+tag+'_'+Date.now()+'.csv');
 }
 function downloadDead() {
   if(!deadList.length) return;
-  dl('email,ten,ly_do\n'+deadList.map(r=>csvEscape(r.email)+','+csvEscape(r.name)+','+csvEscape(r.reason)).join('\n'),'email_bi_loai_'+Date.now()+'.csv');
+  dl('email,first_name,last_name,ly_do\n'+deadList.map(r=>csvEscape(r.email)+','+csvEscape(r.firstName||r.name||'')+','+csvEscape(r.lastName||'')+','+csvEscape(r.reason)).join('\n'),'email_bi_loai_'+Date.now()+'.csv');
 }
 function csvEscape(v='') { const s=String(v); return (s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s; }
 function dl(content,name) {
