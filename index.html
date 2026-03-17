@@ -4,535 +4,412 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lọc Email Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #f5f6fa;
-  --surface: #ffffff;
-  --surface2: #f0f1f8;
-  --border: #e3e6ef;
-  --border2: #cdd1e0;
-  --alive: #0fa968;
-  --alive-bg: #edfbf4;
-  --dead: #e03e52;
-  --dead-bg: #fff0f2;
-  --warn: #d97706;
-  --warn-bg: #fffbeb;
-  --text: #1a1d2e;
-  --sub: #6b7195;
-  --muted: #a0a5c0;
-  --accent: #4f46e5;
-  --accent-l: #ede9fe;
-  --accent2: #7c3aed;
-  --item-h: 40px;
+  --bg: #f4f6fb;
+  --white: #ffffff;
+  --surface2: #f8f9fc;
+  --border: #e4e8f0;
+  --border2: #d0d6e4;
+  --blue: #4f46e5;
+  --blue-light: #ede9fe;
+  --blue-mid: #6366f1;
+  --green: #10b981;
+  --green-light: #d1fae5;
+  --red: #ef4444;
+  --red-light: #fee2e2;
+  --orange: #f59e0b;
+  --text: #1e2433;
+  --text2: #4b5563;
+  --muted: #9ca3af;
+  --muted2: #d1d5db;
+  --shadow: 0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
   --radius: 12px;
+  --sans: 'Plus Jakarta Sans',sans-serif;
+  --mono: 'DM Mono',monospace;
 }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* HEADER */
+.header{background:var(--white);border-bottom:1px solid var(--border);padding:0 36px;height:60px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 1px 0 var(--border)}
+.logo-mark{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--blue-mid));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.3)}
+.header-brand{display:flex;align-items:baseline;gap:8px}
+.header-brand h1{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.header-brand h1 span{color:var(--blue)}
+.version-tag{background:var(--blue-light);color:var(--blue);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.5px}
+.header-sub{font-size:11px;color:var(--muted);margin-left:4px;font-weight:500}
+.header-actions{margin-left:auto;display:flex;gap:8px}
+.pill-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid;transition:all .18s;background:transparent;font-family:var(--sans);display:flex;align-items:center;gap:5px}
+.pill-kw{border-color:#fca5a5;color:var(--red);background:#fff5f5}
+.pill-kw:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.pill-bounce{border-color:#fcd34d;color:#b45309;background:#fffbeb}
+.pill-bounce:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  min-height: 100vh;
-  padding: 2rem 1.5rem 3rem;
-  font-size: 14px;
-  line-height: 1.5;
-}
+/* LAYOUT */
+.container{max-width:1180px;margin:0 auto;padding:28px 24px}
 
-.wrapper { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;cursor:default}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(79,70,229,.12)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.stat-total::before{background:linear-gradient(90deg,#6366f1,#818cf8)}
+.stat-valid::before{background:linear-gradient(90deg,#10b981,#34d399)}
+.stat-invalid::before{background:linear-gradient(90deg,#ef4444,#f87171)}
+.stat-rate::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.stat-num{font-size:32px;font-weight:800;line-height:1;letter-spacing:-1px;margin-top:4px}
+.stat-total .stat-num{color:var(--blue-mid)}
+.stat-valid .stat-num{color:var(--green)}
+.stat-invalid .stat-num{color:var(--red)}
+.stat-rate .stat-num{color:var(--orange)}
+.stat-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-top:8px}
 
-/* ── Header ── */
-.header-row { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
-.logo { font-size: 1.65rem; font-weight: 700; letter-spacing: -0.04em; }
-.logo .hi { color: var(--accent); }
-.logo .h2 { color: var(--accent2); }
-.logo-badge { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--alive); background: var(--alive-bg); border: 1px solid rgba(34,209,122,0.3); border-radius: 20px; padding: 3px 9px; margin-left: 0.5rem; vertical-align: middle; }
-.logo-sub { font-size: 0.72rem; color: var(--sub); margin-top: 4px; }
+/* MAIN GRID */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:800px){.main-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:repeat(2,1fr)}}
 
-/* ── Stats ── */
-.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
-.stat-item { padding: 1.1rem 1.25rem; border-right: 1px solid var(--border); position: relative; overflow: hidden; }
-.stat-item:last-child { border-right: none; }
-.stat-item::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
-.stat-item:nth-child(1)::before { background: var(--accent); }
-.stat-item:nth-child(2)::before { background: var(--alive); }
-.stat-item:nth-child(3)::before { background: var(--dead); }
-.stat-item:nth-child(4)::before { background: var(--warn); }
-.stat-label { font-size: 0.64rem; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.1em; }
-.stat-val { font-size: 1.8rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; margin-top: 4px; }
-.stat-val.v-total  { color: var(--accent); }
-.stat-val.v-passed { color: var(--alive); }
-.stat-val.v-failed { color: var(--dead); }
-.stat-val.v-rate   { color: var(--warn); }
-.progress-wrap { height: 3px; background: var(--border); border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; margin-top: -1px; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--alive)); border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.card-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:7px}
+.card-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.ci-blue{background:var(--blue-light)}
+.ci-green{background:var(--green-light)}
 
-/* ── Two col ── */
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-@media(max-width:720px){ .two-col { grid-template-columns: 1fr; } }
+/* TABS */
+.tabs{display:flex;background:var(--bg);border-radius:9px;padding:3px;margin-bottom:14px;border:1px solid var(--border)}
+.tab{flex:1;padding:7px 10px;text-align:center;font-size:12px;font-weight:600;border-radius:7px;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--sans);transition:all .18s}
+.tab.active{background:var(--white);color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 
-/* ── Card ── */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
-.card-title { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sub); margin-bottom: 1rem; }
+/* INPUTS */
+textarea,select{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color .18s,box-shadow .18s;resize:vertical}
+textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(99,102,241,.1);background:var(--white)}
+textarea::placeholder{color:var(--muted);font-family:var(--mono)}
+select option{background:var(--white);font-family:var(--sans)}
 
-/* ── Tabs ── */
-.tab-bar { display: flex; gap: 0.3rem; margin-bottom: 0.85rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
-.tab-btn {
-  font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 600;
-  padding: 0.35rem 0.85rem; border-radius: 6px; border: none;
-  cursor: pointer; background: transparent; color: var(--sub); transition: all 0.15s; flex: 1; text-align: center;
-}
-.tab-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.1); border: 1px solid var(--border); }
-.tab-content { display: none; flex-direction: column; gap: 0.75rem; }
-.tab-content.active { display: flex; }
+/* DROPZONE */
+.dropzone{border:2px dashed var(--border2);border-radius:10px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .18s;background:var(--surface2)}
+.dropzone:hover,.dropzone.dragover{border-color:var(--blue);background:var(--blue-light)}
+.dropzone-icon{font-size:30px;margin-bottom:8px}
+.dropzone-text{font-size:12px;color:var(--text2);line-height:1.8;font-weight:500}
+.dropzone-text strong{color:var(--blue)}
 
-/* ── Upload ── */
-.drop-zone {
-  border: 2px dashed var(--border2); border-radius: 10px;
-  padding: 1.5rem; text-align: center; cursor: pointer;
-  transition: all 0.2s; position: relative; background: var(--bg);
-}
-.drop-zone:hover, .drop-zone.over { border-color: var(--accent); background: var(--accent-l); }
-.drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.drop-icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
-.drop-text { font-size: 0.75rem; color: var(--sub); }
-.drop-text strong { color: var(--accent); }
-.file-info { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--alive); margin-top: 0.4rem; min-height: 1em; }
-.bar-wrap { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; display: none; margin-top: 0.5rem; }
-.bar-wrap.on { display: block; }
-.bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s; }
+/* COL SELECT */
+.col-select-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}
+.col-select-label{font-size:11px;color:var(--text2);font-weight:600;margin-bottom:5px;letter-spacing:.5px}
 
-/* ── Col mapping ── */
-.col-map-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 0.9rem; font-size: 0.72rem; color: var(--sub); display: none; }
-.col-map-box.show { display: block; }
-.col-map-title { font-weight: 700; color: var(--text); margin-bottom: 0.6rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
-.col-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.45rem; }
-.col-row:last-child { margin-bottom: 0; }
-.col-lbl { font-size: 0.68rem; width: 80px; flex-shrink: 0; }
-.col-lbl .req { color: var(--dead); }
-.col-lbl .opt { color: var(--sub); }
-select.col-sel {
-  font-family: 'DM Sans', sans-serif; font-size: 0.7rem;
-  border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px;
-  background: var(--surface); color: var(--text); outline: none; flex: 1;
-  transition: border-color 0.2s;
-}
-select.col-sel:focus { border-color: var(--accent); }
+/* INFO HINT */
+.info-hint{background:var(--blue-light);border:1px solid #c7d2fe;border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:#4338ca;line-height:1.7;font-weight:500}
+.info-hint strong{color:var(--blue);font-weight:700}
 
-/* ── Textarea ── */
-textarea {
-  width: 100%; min-height: 160px;
-  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-  color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.74rem;
-  line-height: 1.8; padding: 0.85rem 1rem; resize: vertical; outline: none;
-  transition: border-color 0.2s;
-}
-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,106,247,0.1); }
-textarea::placeholder { color: var(--muted); }
+/* OPTIONS */
+.options-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:13px 15px;margin-top:12px}
+.options-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.opt-item{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .12s}
+.opt-item:hover{background:var(--border)}
+.opt-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
 
-.hint-box { background: var(--accent-l); border: 1px solid rgba(91,106,247,0.2); border-radius: 8px; padding: 0.6rem 0.85rem; font-size: 0.7rem; color: var(--sub); line-height: 1.7; }
-.hint-box strong { color: var(--accent); }
-.hint-row { display: flex; align-items: center; justify-content: space-between; }
-.paste-count { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--sub); }
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:9px;font-size:12px;font-family:var(--sans);font-weight:700;cursor:pointer;border:none;transition:all .18s;letter-spacing:.2px;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue-mid));color:#fff;width:100%;justify-content:center;font-size:13px;padding:13px;box-shadow:0 4px 14px rgba(79,70,229,.3)}
+.btn-primary:hover{box-shadow:0 6px 20px rgba(79,70,229,.4);transform:translateY(-1px)}
+.btn-primary:disabled{background:var(--muted2);color:var(--muted);box-shadow:none;transform:none;cursor:not-allowed}
+.btn-ghost{background:var(--white);border:1.5px solid var(--border2);color:var(--text2);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.btn-ghost:hover{border-color:var(--blue-mid);color:var(--blue)}
+.btn-danger{background:var(--red-light);border:1.5px solid #fca5a5;color:var(--red)}
+.btn-danger:hover{background:#fecaca}
+.btn-green{background:var(--green-light);border:1.5px solid #6ee7b7;color:#059669}
+.btn-green:hover{background:#a7f3d0}
+.btn-blue-soft{background:var(--blue-light);border:1.5px solid #c7d2fe;color:var(--blue)}
+.btn-blue-soft:hover{background:#e0e7ff}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-row{display:flex;gap:8px;margin-top:14px}
 
-/* ── Options ── */
-.options { display: flex; gap: 0.85rem; flex-wrap: wrap; }
-label.opt {
-  display: flex; align-items: center; gap: 0.4rem;
-  font-size: 0.72rem; font-weight: 500; color: var(--sub); cursor: pointer;
-  transition: color 0.15s;
-}
-label.opt:hover { color: var(--text); }
-label.opt input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; }
+/* INPUT COUNT */
+.input-count{font-size:11px;color:var(--muted);margin-top:6px;font-weight:500}
 
-/* ── Buttons ── */
-.btn-row { display: flex; gap: 0.6rem; }
-.btn {
-  font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600;
-  border: none; border-radius: 8px; padding: 0.65rem 1.25rem; cursor: pointer;
-  transition: all 0.15s; display: flex; align-items: center; gap: 0.4rem;
-}
-.btn-primary { background: var(--accent); color: #fff; flex: 1; justify-content: center; box-shadow: 0 2px 10px rgba(79,70,229,0.25); }
-.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(79,70,229,0.35); }
-.btn-primary:active:not(:disabled) { transform: translateY(0); }
-.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-.btn-ghost { background: transparent; color: var(--sub); border: 1px solid var(--border); border-radius: 8px; }
-.btn-ghost:hover { color: var(--text); border-color: var(--border2); }
-.btn-sm {
-  font-family: 'DM Sans', sans-serif; font-size: 0.67rem; font-weight: 600;
-  padding: 0.28rem 0.7rem; border-radius: 6px; border: 1px solid var(--border);
-  background: transparent; color: var(--sub); cursor: pointer; transition: all 0.15s;
-}
-.btn-sm:hover { border-color: var(--alive); color: var(--alive); }
+/* RESULT HEADER */
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;gap:8px;flex-wrap:wrap}
+.result-title{font-size:13px;font-weight:800;display:flex;align-items:center;gap:7px}
+.result-title.valid{color:var(--green)}
+.result-title.invalid{color:var(--red)}
+.count-badge{padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-green{background:var(--green-light);color:#059669}
+.badge-red{background:var(--red-light);color:var(--red)}
+.result-actions{display:flex;gap:6px;flex-wrap:wrap}
 
-/* ── Keyword chip ── */
-.kw-chip {
-  display: inline-flex; align-items: center; gap: 0.3rem;
-  background: var(--warn-bg); border: 1px solid #fcd34d;
-  color: var(--warn); border-radius: 8px; font-size: 0.7rem; font-weight: 600;
-  padding: 0.35rem 0.8rem; cursor: pointer; transition: all 0.15s;
-}
-.kw-chip:hover { background: #fef3c7; }
+/* DOMAIN FILTERS */
+.domain-filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px;align-items:center}
+.domain-label{font-size:11px;font-weight:600;color:var(--muted);margin-right:2px}
+.domain-btn{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid var(--border2);color:var(--muted);background:var(--white);cursor:pointer;font-family:var(--sans);transition:all .13s}
+.domain-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.domain-btn:hover:not(.active){border-color:var(--blue-mid);color:var(--blue-mid)}
 
-/* ── Out panel ── */
-.out-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
-.out-title { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sub); }
-.out-actions { display: flex; gap: 0.4rem; align-items: center; }
+/* EMAIL LIST */
+.email-list{height:220px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:8px}
+.email-item{font-size:11.5px;color:var(--text2);padding:4px 8px;border-radius:6px;transition:background .1s;font-family:var(--mono);display:flex;align-items:center;gap:6px}
+.email-item:hover{background:var(--white)}
+.email-item .em{color:var(--text);font-weight:500}
+.email-item .nm{color:var(--muted);font-size:10.5px}
+.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:12px;gap:8px;font-weight:500}
+.empty-icon{font-size:28px;opacity:.5}
 
-.out-box {
-  border: 1px solid var(--border); border-radius: 10px;
-  background: var(--bg); height: 290px; overflow-y: auto; position: relative;
-}
-.vs-inner { position: relative; width: 100%; }
-.vs-win { position: absolute; top: 0; left: 0; right: 0; }
+/* CHUNK SECTION */
+.chunk-section{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-top:20px;box-shadow:var(--shadow)}
+.chunk-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+.chunk-title{font-size:15px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px}
+.chunk-title-icon{background:linear-gradient(135deg,#10b981,#34d399);color:#fff;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.chunk-subtitle{font-size:11px;color:var(--muted);font-weight:500;margin-top:5px;letter-spacing:.3px}
+.chunk-controls{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+.chunk-controls select{flex:1;font-family:var(--sans);font-weight:500}
+.chunk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:16px}
+.chunk-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:11px 13px;cursor:pointer;text-align:left;transition:all .15s;font-family:var(--sans)}
+.chunk-btn:hover{border-color:var(--blue-mid);background:var(--blue-light);box-shadow:0 2px 8px rgba(99,102,241,.12)}
+.chunk-btn.done{border-color:#6ee7b7;background:#f0fdf4}
+.chunk-btn.done:hover{border-color:#10b981;background:#dcfce7}
+.chunk-btn.selected{border-color:var(--blue);background:var(--blue-light)}
+.chunk-btn-num{font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.chunk-btn.done .chunk-btn-num{color:#059669}
+.chunk-btn.selected .chunk-btn-num{color:var(--blue)}
+.chunk-btn-count{font-size:10.5px;color:var(--muted);font-weight:500}
+.chunk-done-tag{display:inline-block;background:#bbf7d0;color:#059669;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-top:4px;letter-spacing:.5px}
 
-.email-row {
-  height: var(--item-h); padding: 0 0.9rem;
-  display: flex; align-items: center; gap: 0.65rem;
-  border-bottom: 1px solid rgba(42,49,72,0.6);
-  font-family: 'JetBrains Mono', monospace; font-size: 0.71rem;
-  transition: background 0.1s;
-}
-.email-row:hover { background: #f7f8fd; }
-.email-row:last-child { border-bottom: none; }
-.dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: var(--alive);  }
-.eaddr { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
-.ename { font-size: 0.67rem; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; flex-shrink: 0; }
-.ename.has-name { color: var(--accent); font-weight: 500; }
+/* PROGRESS */
+.progress-wrap{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.progress-meta{display:flex;justify-content:space-between;font-size:11px;font-weight:600;margin-bottom:7px}
+.progress-meta .plabel{color:var(--muted)}
+.progress-meta .ppct{color:var(--blue)}
+.progress-track{height:6px;background:var(--bg);border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),#818cf8);transition:width .4s cubic-bezier(.4,0,.2,1);border-radius:10px}
 
-.empty-box { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; color: var(--muted); font-size: 0.75rem; }
-.empty-box .icon { font-size: 1.75rem; }
+/* PROCESSING */
+.processing-bar{display:none;height:3px;border-radius:2px;overflow:hidden;margin-top:10px;background:var(--border)}
+.processing-bar.active{display:block}
+.processing-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),#818cf8);animation:pbar 1.2s ease-in-out infinite}
+@keyframes pbar{0%{width:0;margin-left:0}50%{width:55%;margin-left:22%}100%{width:0;margin-left:100%}}
+.spinner{display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .55s linear infinite}
+.spinner.active{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── Domain filter ── */
-.filter-bar {
-  display: flex; align-items: center; gap: 0.35rem;
-  flex-wrap: wrap; padding: 0.5rem 0.75rem;
-  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-  margin-bottom: 0.75rem;
-}
-.filter-label { font-size: 0.64rem; font-weight: 700; color: var(--sub); margin-right: 0.15rem; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.08em; }
-.f-btn {
-  font-family: 'DM Sans', sans-serif; font-size: 0.68rem; font-weight: 600;
-  padding: 0.22rem 0.6rem; border-radius: 20px; border: 1px solid var(--border);
-  background: transparent; color: var(--sub); cursor: pointer; transition: all 0.15s;
-  display: flex; align-items: center; gap: 0.25rem; white-space: nowrap;
-}
-.f-btn:hover { border-color: var(--border2); color: var(--text); }
-.f-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px rgba(91,106,247,0.3); }
-.f-btn .fc { font-size: 0.58rem; background: rgba(255,255,255,0.2); padding: 0 4px; border-radius: 8px; }
-.f-btn:not(.on) .fc { background: var(--border); color: var(--sub); }
-.f-sep { width: 1px; height: 16px; background: var(--border); flex-shrink: 0; }
-.f-search {
-  flex: 1; min-width: 90px; max-width: 150px;
-  font-family: 'DM Sans', sans-serif; font-size: 0.7rem;
-  border: 1px solid var(--border); border-radius: 20px; padding: 0.22rem 0.7rem;
-  background: transparent; color: var(--text); outline: none; transition: border-color 0.2s;
-}
-.f-search:focus { border-color: var(--accent); }
-.f-search::placeholder { color: var(--muted); }
-.f-result { font-size: 0.65rem; color: var(--sub); margin-left: auto; white-space: nowrap; }
-
-/* ── Badge ── */
-.badge { display: inline-flex; align-items: center; font-size: 0.63rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
-.badge-green { background: var(--alive-bg); color: var(--alive); border: 1px solid rgba(34,209,122,0.2); }
-.badge-red   { background: var(--dead-bg);  color: var(--dead); border: 1px solid rgba(241,80,110,0.2); }
-
-/* ── Busy ── */
-.busy { font-size: 0.72rem; font-weight: 600; color: var(--accent); display: none; }
-.busy.on { display: inline; animation: pulse 1.2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-/* ── Dead card compact ── */
-.dead-card { display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 0.85rem 1.25rem; }
-
-/* ── Modal ── */
-.overlay { position: fixed; inset: 0; background: rgba(15,15,30,0.45); z-index: 100; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
-.overlay.open { display: flex; }
-.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; max-width: 600px; width: 100%; max-height: 80vh; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
-.modal-head { display: flex; justify-content: space-between; align-items: center; }
-.modal-title { font-size: 1rem; font-weight: 700; color: var(--text); }
-.modal-close { font-size: 1rem; cursor: pointer; color: var(--sub); background: var(--bg); border: 1px solid var(--border); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.15s; }
-.modal-close:hover { color: var(--text); }
-.modal-note { font-size: 0.71rem; color: var(--sub); line-height: 1.6; }
-.kw-edit {
-  width: 100%; min-height: 180px; max-height: 300px;
-  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-  color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
-  line-height: 1.8; padding: 0.85rem 1rem; resize: vertical; outline: none;
-  transition: border-color 0.2s;
-}
-.kw-edit:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
-.kw-stats { font-size: 0.68rem; color: var(--sub); }
-.kw-stats strong { color: var(--accent); }
-.modal-foot { display: flex; gap: 0.5rem; }
-.btn-outline { font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 600; padding: 0.4rem 0.9rem; border-radius: 7px; border: 1px solid var(--border); background: transparent; color: var(--sub); cursor: pointer; transition: all 0.15s; }
-.btn-outline:hover { border-color: var(--border2); color: var(--text); }
-
-/* ── Preview cols ── */
-.preview-row { font-size: 0.65rem; color: var(--sub); font-family: 'JetBrains Mono', monospace; padding: 0.4rem 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,20,40,.45);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border:1px solid var(--border2);border-radius:16px;width:min(600px,95vw);max-height:82vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.18);animation:modalIn .22s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:800;color:var(--text)}
+.modal-close{background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;transition:all .13s}
+.modal-close:hover{background:var(--red-light);color:var(--red);border-color:#fca5a5}
+.modal-body{padding:20px 22px;overflow-y:auto;flex:1}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surface2)}
+.modal-desc{background:var(--blue-light);border:1px solid #c7d2fe;border-radius:8px;padding:11px 14px;font-size:12px;color:#4338ca;line-height:1.7;margin-bottom:14px;font-weight:500}
+.modal-meta{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px}
+.modal-meta strong{color:var(--blue)}
+.modal-actions{display:flex;gap:8px;margin-bottom:12px}
+.kw-list{min-height:120px;max-height:180px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start}
+.kw-tag{padding:3px 9px;background:var(--white);border:1.5px solid #fca5a5;border-radius:5px;font-size:11px;color:var(--red);cursor:pointer;font-weight:600;transition:all .12s}
+.kw-tag:hover{background:var(--red);color:#fff;border-color:var(--red)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fade-in{animation:fadeUp .28s ease forwards}
 </style>
 </head>
 <body>
-<div class="wrapper">
 
-  <!-- Header -->
-  <div class="header-row">
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-mark">@</div>
+  <div class="header-brand">
+    <h1>Lọc <span>Email Pro</span></h1>
+    <span class="version-tag">V2.0</span>
+  </div>
+  <span class="header-sub">Giữ Tên + Email · Lọc từ khoá · Xuất CSV sẵn gửi</span>
+  <div class="header-actions">
+    <button class="pill-btn pill-kw" onclick="openModal('kw')">🚫 <span id="kwCount">178</span> từ khoá · Quản lý</button>
+    <button class="pill-btn pill-bounce" onclick="openModal('bounce')">⛔ <span id="bounceCount">0</span> bounce · Quản lý</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card stat-total"><div class="stat-label">Tổng đầu vào</div><div class="stat-num" id="statTotal">0</div></div>
+    <div class="stat-card stat-valid"><div class="stat-label">Hợp lệ</div><div class="stat-num" id="statValid">0</div></div>
+    <div class="stat-card stat-invalid"><div class="stat-label">Bị loại</div><div class="stat-num" id="statInvalid">0</div></div>
+    <div class="stat-card stat-rate"><div class="stat-label">Tỉ lệ lọt</div><div class="stat-num" id="statRate">—</div></div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT -->
     <div>
-      <div class="logo">Lọc <span class="hi">Email</span> <span class="h2">Pro</span><span class="logo-badge">v2.0</span></div>
-      <div class="logo-sub">Giữ Tên + Email · Lọc từ khoá · Xuất CSV sẵn gửi</div>
+      <div class="card">
+        <div class="card-title"><div class="card-icon ci-blue">📥</div> Dữ liệu đầu vào</div>
+        <div class="tabs">
+          <button class="tab active" id="tab-paste" onclick="switchTab('paste')">✏️ Dán text</button>
+          <button class="tab" id="tab-upload" onclick="switchTab('upload')">📂 Upload CSV/Excel</button>
+        </div>
+
+        <div id="pane-paste">
+          <div class="info-hint">
+            Hỗ trợ nhiều định dạng: <strong>email,tên</strong> · <strong>tên,email</strong> · <strong>email [tab] tên</strong> · <strong>chỉ email</strong><br>
+            Mỗi dòng một bản ghi. Công cụ tự nhận diện cột.
+          </div>
+          <textarea id="pasteInput" rows="8" placeholder="Dán dữ liệu vào đây, ví dụ:&#10;&#10;nguyen.van.a@gmail.com,Nguyễn Văn A&#10;tran.thi.b@yahoo.com,Trần Thị B&#10;Lê Văn C,levanc@company.vn&#10;good@startup.io&#10;..."></textarea>
+          <div class="input-count" id="pasteCount">0 dòng</div>
+        </div>
+
+        <div id="pane-upload" style="display:none">
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+            <div class="dropzone-icon">📁</div>
+            <div class="dropzone-text">Kéo thả <strong>CSV / TXT / TSV</strong><br>hoặc click để chọn file</div>
+          </div>
+          <input type="file" id="fileInput" accept=".csv,.txt,.tsv" style="display:none">
+          <div class="col-select-row" id="colSelectWrap" style="display:none">
+            <div><div class="col-select-label">★ Cột Email *</div><select id="colEmail"><option value="">— Chọn cột —</option></select></div>
+            <div><div class="col-select-label">◎ First Name</div><select id="colFirstName"><option value="">— Không có —</option></select></div>
+            <div><div class="col-select-label">◎ Last Name</div><select id="colLastName"><option value="">— Không có —</option></select></div>
+            <div><div class="col-select-label">◎ Company</div><select id="colCompany"><option value="">— Không có —</option></select></div>
+            <div><div class="col-select-label">◎ Tag</div><select id="colTag"><option value="">— Không có —</option></select></div>
+          </div>
+        </div>
+
+        <div class="options-wrap">
+          <div class="options-title">⚙ Tùy chọn lọc</div>
+          <div class="options-grid">
+            <label class="opt-item"><input type="checkbox" id="optTrim" checked> Bỏ khoảng trắng</label>
+            <label class="opt-item"><input type="checkbox" id="optDedup" checked> Loại trùng lặp</label>
+            <label class="opt-item"><input type="checkbox" id="optLower" checked> Chuyển thường</label>
+            <label class="opt-item"><input type="checkbox" id="optKeyword" checked> Lọc từ khoá</label>
+            <label class="opt-item"><input type="checkbox" id="optBounce" checked> Loại bounce</label>
+            <label class="opt-item"><input type="checkbox" id="optNoDigitStart" checked> Loại email bắt đầu bằng số</label>
+          </div>
+        </div>
+
+        <div class="processing-bar" id="processingBar"><div class="processing-fill"></div></div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnRun" onclick="runFilter()">
+            <div class="spinner" id="spinner"></div>
+            <span id="btnText">⚡ Chạy lọc</span>
+          </button>
+          <button class="btn btn-ghost" style="flex:0 0 auto;padding:13px 20px" onclick="clearAll()">Xoá</button>
+        </div>
+      </div>
     </div>
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-      <span class="kw-chip" onclick="openModal('kw')">
-        🚫 <span id="kw-count">178</span> từ khoá · Quản lý
-      </span>
-      <span class="kw-chip" style="background:#fff0f2;border-color:#fca5a5;color:#e03e52;" onclick="openModal('bounce')">
-        ⛔ <span id="bounce-count">0</span> bounce · Quản lý
-      </span>
+
+    <!-- RIGHT -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div class="result-header">
+          <div class="result-title valid">EMAIL HỢP LỆ <span class="count-badge badge-green" id="validCount">0</span></div>
+          <div class="result-actions">
+            <button class="btn btn-blue-soft btn-sm" onclick="copyValidEmails()">⎘ Sao chép (TSV)</button>
+            <button class="btn btn-green btn-sm" onclick="downloadValidCSV()">⬇ CSV (5 cột)</button>
+          </div>
+        </div>
+        <div class="domain-filters">
+          <span class="domain-label">LỌC:</span>
+          <button class="domain-btn active" onclick="filterDomain('all',this)">Tất cả <span id="dAll">0</span></button>
+          <button class="domain-btn" onclick="filterDomain('gmail',this)">Gmail <span id="dGmail">0</span></button>
+          <button class="domain-btn" onclick="filterDomain('outlook',this)">Outlook <span id="dOutlook">0</span></button>
+          <button class="domain-btn" onclick="filterDomain('yahoo',this)">Yahoo <span id="dYahoo">0</span></button>
+          <button class="domain-btn" onclick="filterDomain('other',this)">Khác <span id="dOther">0</span></button>
+        </div>
+        <div class="email-list" id="validList"><div class="empty"><div class="empty-icon">📭</div>Chưa có dữ liệu</div></div>
+      </div>
+
+      <div class="card">
+        <div class="result-header">
+          <div class="result-title invalid">BỊ LOẠI <span class="count-badge badge-red" id="invalidCount">0</span></div>
+          <div class="result-actions">
+            <button class="btn btn-danger btn-sm" onclick="downloadInvalidCSV()">⬇ Tải CSV bị loại</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Stats -->
-  <div>
-    <div class="stats-row">
-      <div class="stat-item"><div class="stat-label">Tổng đầu vào</div><div class="stat-val v-total" id="s-total">0</div></div>
-      <div class="stat-item"><div class="stat-label">Hợp lệ</div><div class="stat-val v-passed" id="s-alive">0</div></div>
-      <div class="stat-item"><div class="stat-label">Bị loại</div><div class="stat-val v-failed" id="s-dead">0</div></div>
-      <div class="stat-item"><div class="stat-label">Tỉ lệ lọt</div><div class="stat-val v-rate" id="s-rate">—</div></div>
+  <!-- CHUNK DOWNLOAD -->
+  <div class="chunk-section" id="chunkSection" style="display:none">
+    <div class="chunk-top">
+      <div>
+        <div class="chunk-title"><div class="chunk-title-icon">📦</div> Xuất CSV theo tệp — 2,000 email / tệp</div>
+        <div class="chunk-subtitle" id="chunkSubtitle">0 TỆP · 0 EMAIL HỢP LỆ · ĐÃ TẢI: 0/0</div>
+      </div>
+      <button class="btn btn-green" onclick="downloadAllChunks()">⬇ Tải tất cả</button>
     </div>
-    <div class="progress-wrap"><div class="progress-fill" id="s-bar" style="width:0%"></div></div>
+
+    <div class="chunk-controls">
+      <select id="chunkSelect" onchange="selectChunk(this.value)"><option value="">— Chọn tệp để tải —</option></select>
+      <button class="btn btn-blue-soft" id="btnDownloadSelected" onclick="downloadSelected()" disabled style="white-space:nowrap">⬇ Tải tệp này</button>
+    </div>
+
+    <div class="chunk-grid" id="chunkGrid"></div>
+
+    <div class="progress-wrap">
+      <div class="progress-meta"><span class="plabel">Tiến độ tải xuống</span><span class="ppct" id="progressText">0%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
   </div>
 
-  <!-- Main -->
-  <div class="two-col">
+</div>
 
-    <!-- LEFT: Input -->
-    <div class="card">
-      <div class="card-title">Dữ liệu đầu vào</div>
-
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('paste')">✏️ Dán text</button>
-        <button class="tab-btn" onclick="switchTab('csv')">📂 Upload CSV/Excel</button>
+<!-- KW MODAL -->
+<div class="modal-overlay" id="modal-kw">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">🚫 Quản lý từ khoá loại trừ</div><button class="modal-close" onclick="closeModal('kw')">✕</button></div>
+    <div class="modal-body">
+      <div class="modal-desc">Mỗi từ khoá một dòng (hoặc cách nhau bằng dấu phẩy). Email có chứa từ khoá trong phần local (trước @) sẽ bị loại.<br><strong>Thêm từ khoá mới</strong> bằng cách gõ thẳng vào ô bên dưới.</div>
+      <div class="modal-meta">Đang dùng: <strong id="kwModalCount">178</strong> từ khoá</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="sortKeywords()">↕ Sắp xếp A-Z</button>
+        <button class="btn btn-danger btn-sm" onclick="resetKeywords()">↺ Reset mặc định</button>
       </div>
-
-      <!-- Paste -->
-      <div class="tab-content active" id="tab-paste">
-        <div class="hint-box">
-          Hỗ trợ nhiều định dạng:<br>
-          <strong>email,tên</strong> &nbsp;·&nbsp; <strong>tên,email</strong> &nbsp;·&nbsp; <strong>email [tab] tên</strong> &nbsp;·&nbsp; <strong>chỉ email</strong><br>
-          Mỗi dòng một bản ghi. Công cụ tự nhận diện cột.
-        </div>
-        <textarea id="input-emails" placeholder="Dán dữ liệu vào đây, ví dụ:&#10;&#10;nguyen.van.a@gmail.com,Nguyễn Văn A&#10;tran.thi.b@yahoo.com,Trần Thị B&#10;Lê Văn C,levanc@company.vn&#10;good@startup.io&#10;..."></textarea>
-        <div class="hint-row">
-          <span class="paste-count" id="paste-count">0 dòng</span>
-          <span style="font-size:0.65rem;color:var(--muted)" id="paste-detect"></span>
-        </div>
-      </div>
-
-      <!-- CSV -->
-      <div class="tab-content" id="tab-csv">
-        <div class="drop-zone" id="drop-zone">
-          <input type="file" id="csv-file" accept=".csv,.txt,.tsv" onchange="handleFile(this)">
-          <div class="drop-icon">📁</div>
-          <div class="drop-text">Kéo thả <strong>CSV / TXT / TSV</strong><br>hoặc click để chọn file</div>
-          <div class="file-info" id="file-info"></div>
-        </div>
-        <div class="bar-wrap" id="bar-wrap"><div class="bar-fill" id="bar-fill"></div></div>
-
-        <div class="col-map-box" id="col-map-box">
-          <div class="col-map-title">🗂 Chọn cột dữ liệu</div>
-          <div class="col-row">
-            <span class="col-lbl"><span class="req">★</span> Email</span>
-            <select class="col-sel" id="col-email"><option value="">— Chọn cột —</option></select>
-          </div>
-          <div class="col-row">
-            <span class="col-lbl"><span class="opt">◎</span> Tên KH</span>
-            <select class="col-sel" id="col-name"><option value="">— Không có —</option></select>
-          </div>
-          <div class="preview-row" id="col-preview" style="display:none"></div>
-        </div>
-      </div>
-
-      <div class="options">
-        <label class="opt"><input type="checkbox" id="opt-trim" checked> Bỏ khoảng trắng</label>
-        <label class="opt"><input type="checkbox" id="opt-dedup" checked> Loại trùng lặp</label>
-        <label class="opt"><input type="checkbox" id="opt-lower" checked> Chuyển thường</label>
-        <label class="opt"><input type="checkbox" id="opt-kw" checked> Lọc từ khoá</label>
-        <label class="opt"><input type="checkbox" id="opt-bounce" checked> Loại bounce</label>
-        <label class="opt"><input type="checkbox" id="opt-numstart" checked> Loại email bắt đầu bằng số</label>
-      </div>
-
-      <span class="busy" id="busy">⏳ Đang xử lý...</span>
-
-      <div class="btn-row">
-        <button class="btn btn-primary" id="run-btn" onclick="run()">⚡ Chạy lọc</button>
-        <button class="btn btn-ghost" onclick="clearAll()">Xoá</button>
-      </div>
+      <div class="kw-list" id="kwList"></div>
+      <div style="margin-top:12px"><div class="col-select-label" style="margin-bottom:6px">Thêm từ khoá mới</div><textarea id="kwInput" rows="3" placeholder="test, demo, noreply, info..."></textarea></div>
     </div>
-
-    <!-- RIGHT: Output -->
-    <div style="display:flex;flex-direction:column;gap:1rem;">
-
-      <div class="card" style="flex:1">
-        <div class="out-header">
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <span class="out-title">Email hợp lệ</span>
-            <span class="badge badge-green" id="alive-badge">0</span>
-          </div>
-          <div class="out-actions">
-            <button class="btn-sm" id="btn-copy" onclick="copyAlive()">⎘ Sao chép email+tên</button>
-            <button class="btn-sm" onclick="downloadAlive()">⬇ CSV (email+tên)</button>
-          </div>
-        </div>
-
-        <div class="filter-bar">
-          <span class="filter-label">Lọc:</span>
-          <button class="f-btn on" id="fb-all"     onclick="setFilter('all')">Tất cả <span class="fc" id="fc-all">0</span></button>
-          <button class="f-btn"    id="fb-gmail"   onclick="setFilter('gmail')">Gmail <span class="fc" id="fc-gmail">0</span></button>
-          <button class="f-btn"    id="fb-outlook" onclick="setFilter('outlook')">Outlook <span class="fc" id="fc-outlook">0</span></button>
-          <button class="f-btn"    id="fb-yahoo"   onclick="setFilter('yahoo')">Yahoo <span class="fc" id="fc-yahoo">0</span></button>
-          <button class="f-btn"    id="fb-other"   onclick="setFilter('other')">Khác <span class="fc" id="fc-other">0</span></button>
-          <div class="f-sep"></div>
-          <input class="f-search" id="f-search" placeholder="Tìm domain..." oninput="onSearchInput(this.value)">
-          <span class="f-result" id="f-result"></span>
-        </div>
-
-        <div class="out-box" id="alive-box" onscroll="vsScroll()">
-          <div class="vs-inner" id="alive-inner" style="height:120px">
-            <div class="vs-win" id="alive-win">
-              <div class="empty-box"><div class="icon">📭</div><div>Chưa có dữ liệu</div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card dead-card">
-        <div style="display:flex;align-items:center;gap:0.6rem;">
-          <span class="out-title">Bị loại</span>
-          <span class="badge badge-red" id="dead-badge">0</span>
-        </div>
-        <button class="btn-sm" onclick="downloadDead()">⬇ Tải CSV bị loại</button>
-      </div>
-
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('kw')">✕ Đóng</button>
+      <button class="btn btn-primary" style="width:auto;padding:9px 20px" onclick="applyKeywords()">✅ Áp dụng từ khoá</button>
     </div>
   </div>
 </div>
 
-<!-- Modal từ khoá -->
-<div class="overlay" id="overlay" onclick="outsideClose(event)">
+<!-- BOUNCE MODAL -->
+<div class="modal-overlay" id="modal-bounce">
   <div class="modal">
-    <div class="modal-head">
-      <span class="modal-title">🚫 Quản lý từ khoá loại trừ</span>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-note">
-      Mỗi từ khoá một dòng (hoặc cách nhau bằng dấu phẩy). Email có chứa từ khoá trong phần local (trước @) sẽ bị loại.<br>
-      <strong style="color:var(--accent)">Thêm từ khoá mới</strong> bằng cách gõ thẳng vào ô bên dưới.
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem">
-      <span class="kw-stats">Đang dùng: <strong id="kw-active-count">178</strong> từ khoá</span>
-      <div style="display:flex;gap:0.4rem">
-        <button class="btn-outline" onclick="sortKw()">↕ Sắp xếp A-Z</button>
-        <button class="btn-outline" onclick="resetKw()">↺ Reset mặc định</button>
+    <div class="modal-header"><div class="modal-title">⛔ Danh sách Mail Bounce</div><button class="modal-close" onclick="closeModal('bounce')">✕</button></div>
+    <div class="modal-body">
+      <div class="modal-desc">Mỗi email một dòng. Các email này sẽ bị loại khỏi kết quả khi chạy lọc.<br><strong>Paste thẳng danh sách bounce</strong> từ ESP (Mailchimp, Brevo...) vào đây.</div>
+      <div class="modal-meta">Đang có: <strong id="bounceModalCount">0</strong> email bounce</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="sortBounce()">↕ Sắp xếp A-Z</button>
+        <button class="btn btn-danger btn-sm" onclick="clearBounce()">🗑 Xoá tất cả</button>
       </div>
+      <textarea id="bounceInput" rows="10" placeholder="email1@domain.com&#10;email2@domain.com&#10;..."></textarea>
     </div>
-    <textarea class="kw-edit" id="kw-edit" oninput="onKwEdit()"></textarea>
-    <div class="modal-foot">
-      <button class="btn-outline" onclick="closeModal()">✕ Đóng</button>
-      <button class="btn-primary btn" style="flex:1;justify-content:center" onclick="applyKw()">✅ Áp dụng từ khoá</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal bounce list -->
-<div class="overlay" id="overlay-bounce" onclick="outsideBounceClose(event)">
-  <div class="modal">
-    <div class="modal-head">
-      <span class="modal-title">⛔ Danh sách Mail Bounce</span>
-      <button class="modal-close" onclick="closeBounceModal()">✕</button>
-    </div>
-    <div class="modal-note">
-      Mỗi email một dòng. Các email này sẽ bị loại khỏi kết quả khi chạy lọc.<br>
-      <strong style="color:var(--dead)">Paste thẳng danh sách bounce</strong> từ ESP (Mailchimp, Brevo...) vào đây.
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem">
-      <span class="kw-stats">Đang có: <strong id="bounce-edit-count">0</strong> email bounce</span>
-      <div style="display:flex;gap:0.4rem">
-        <button class="btn-outline" onclick="sortBounce()">↕ Sắp xếp A-Z</button>
-        <button class="btn-outline" onclick="clearBounce()">🗑 Xoá tất cả</button>
-      </div>
-    </div>
-    <textarea class="kw-edit" id="bounce-edit" placeholder="Dán danh sách bounce vào đây&#10;&#10;badmail@example.com&#10;bounced@domain.vn&#10;invalid@test.com&#10;..." oninput="onBounceEdit()"></textarea>
-    <div class="modal-foot">
-      <button class="btn-outline" onclick="closeBounceModal()">✕ Đóng</button>
-      <button class="btn-primary btn" style="flex:1;justify-content:center;background:var(--dead);box-shadow:0 2px 10px rgba(224,62,82,0.25)" onclick="applyBounce()">✅ Áp dụng bounce list</button>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('bounce')">✕ Đóng</button>
+      <button class="btn btn-primary" style="width:auto;padding:9px 20px" onclick="applyBounce()">✅ Áp dụng bounce list</button>
     </div>
   </div>
 </div>
 
 <script>
-// ── Keywords ──────────────────────────────────────────────────
-const DEFAULT_KW = ["&",".sg","7x","8x","9x","abc","acb","acc","ae","agri","angle","aoc","appl","bab","bachtuyet","bad","beau","bee","ben","best","bl","bongdem","botbi","boy","bs","bup","caf","cart","cau","chang","chim","chip","chis","chua","cobe","congty","cont","contact","cotech","credit","cry","cskh","ctcp","ctt","ctx","cty","cute","dautu","des","det","dienlanh","dienmay","dient","dientu","doi","dulich","edu","er","ey","fa","gai","galaxy","game","gau","giangsinh","giare","girl","hack","hak","hanhphuc","hee","heo","hero","hihi","hoahau","hoc","hope","hot","hotel","hotl","ieu","ii","info","iu","j","jsc","k5","ka","ke","khung","kiss","kk","ko","ku","lala","lambor","land","langt","lee","lov","lucky","lux","mart","max","may","meo","minion","mkt","mobi","mp3","mr","msb","muadong","muathu","muaxuan","mypham","net","ngau","ngois","nhoc","niem","no.1","no1","noith","nok","ok","online","oo","ox","pa","pe","phar","pr","quak","rap","rk","robert","saigon","sale","sao","sex","shop","sil","sky","sport","ss","store","studio","taichinh","tea","tee","thietb","thietbi","tks","tmdt","toiac","top","trai","troi","tspt","tuoith","tuvan","uid","ute","vip","vui","xaydung","xinh","xnk","xuong","xx","xyz","ya","yeu","yr","yu","zai","zip"];
-let currentKw = [...DEFAULT_KW];
+const DEFAULT_KEYWORDS=['noreply','no-reply','no_reply','donotreply','do-not-reply','do_not_reply','admin','administrator','webmaster','postmaster','hostmaster','abuse','support','helpdesk','help','info','information','contact','service','sales','marketing','billing','invoice','finance','accounting','payroll','hr','human.resources','recruitment','careers','jobs','hiring','test','testing','demo','sample','example','temp','temporary','dummy','spam','junk','trash','delete','removed','unsubscribe','optout','bounce','bounced','invalid','unknown','mailer-daemon','maildaemon','newsletter','news','updates','alerts','notifications','notify','security','noc','network','devnull','dev.null','null','void','root','system','server','bot','robot','crawler','spider','auto','automated','automate','machine','daemon','svc','srv','fax','scan','scanner','printer','copier','device','office','reception','general','enquiries','enquiry','social','media','press','public','relations','pr','legal','compliance','privacy','gdpr','dpo','team','group','list','distribution','dl','alias','catch-all','catchall','wildcard','all','everyone','staff','error','failure','fail','retry','confirm','confirmation','verify','verification','activate','activation','password','reset','forgot','account','register','signup','login','order','orders','purchase','shop','store','cart','checkout','reply','replyto','reply-to','from','sender','internal','corp','corporate','company','enterprise','api','webhook','integration','developer','dev','qa','staging','prod','monitor','monitoring','alert','alarm','report','reports','analytics','feed','rss','atom','syndication','abuse-reports','phishing','fraud','security-alerts','user','users','member','members','subscriber','subscribers','no.reply','donot','not-reply'];
 
-function activeKw() { return currentKw.filter(k => k.trim()); }
-function updateChip() {
-  document.getElementById('kw-count').textContent = activeKw().length;
-  const el = document.getElementById('kw-active-count');
-  if (el) el.textContent = activeKw().length;
-}
-
-function kwListToText(list) { return list.join('\n'); }
-function kwTextToList(text) {
-  return text.split(/[\n,]/).map(k=>k.trim().toLowerCase()).filter(k=>k.length>0);
-}
-
-// ── Modal ──────────────────────────────────────────────────────
-function openModal(type) {
-  if (type === 'bounce') { openBounceModal(); return; }
-  const ta = document.getElementById('kw-edit');
-  ta.value = kwListToText(currentKw);
-  updateChip();
-  document.getElementById('overlay').classList.add('open');
-  setTimeout(()=>ta.focus(),100);
-}
-function closeModal() { document.getElementById('overlay').classList.remove('open'); updateChip(); }
-function outsideClose(e) { if(e.target.id==='overlay') closeModal(); }
-function onKwEdit() {
-  const list = kwTextToList(document.getElementById('kw-edit').value);
-  const el = document.getElementById('kw-active-count');
-  if (el) el.textContent = list.length;
-}
-function applyKw() {
-  currentKw = kwTextToList(document.getElementById('kw-edit').value);
-  closeModal();
-}
-function sortKw() {
-  const ta = document.getElementById('kw-edit');
-  const list = kwTextToList(ta.value).sort();
-  ta.value = kwListToText(list);
-  onKwEdit();
-}
-function resetKw() {
-  currentKw = [...DEFAULT_KW];
-  const ta = document.getElementById('kw-edit');
-  ta.value = kwListToText(currentKw);
-  onKwEdit();
-}
-
-// ── Tabs ──────────────────────────────────────────────────────
-function switchTab(n) {
-  ['paste','csv'].forEach(t => document.getElementById('tab-'+t).classList.toggle('active', t===n));
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['paste','csv'][i]===n));
-}
-
-// ── Bounce list ───────────────────────────────────────────────
-let bounceSet = new Set([
+// ── BOUNCE LIST ──────────────────────────────────────────────────────────────
+// Paste danh sách email bounce vào đây (mỗi email một dòng).
+// Dòng bắt đầu bằng // sẽ bị bỏ qua.
+// =============================================================================
+const BOUNCE_LIST_RAW = `
 "012.smyth@gmail.com",
 "01658718098@msb.com.vn",
 "01686097442@msb.com.vn",
@@ -36318,415 +36195,262 @@ let bounceSet = new Set([
 "zd3pzai9xz@zing.vn",
 "zenynguyen_pisces_2003@yahoo.com",
 "zjzi_kieuki@yahoo.com"
-]);
+`;
+// =============================================================================
 
-function updateBounceChip() {
-  document.getElementById('bounce-count').textContent = bounceSet.size;
-  const el = document.getElementById('bounce-edit-count');
-  if (el) el.textContent = bounceSet.size;
-}
-function bounceListToText(set) { return [...set].sort().join('\n'); }
-function bounceTextToSet(text) {
-  return new Set(
-    text.split(/[\n,]/).map(e=>e.trim().toLowerCase()).filter(e=>e.includes('@'))
-  );
-}
-function openBounceModal() {
-  const ta = document.getElementById('bounce-edit');
-  ta.value = bounceListToText(bounceSet);
-  document.getElementById('bounce-edit-count').textContent = bounceSet.size;
-  document.getElementById('overlay-bounce').classList.add('open');
-  setTimeout(()=>ta.focus(),100);
-}
-function closeBounceModal() {
-  document.getElementById('overlay-bounce').classList.remove('open');
-  updateBounceChip();
-}
-function outsideBounceClose(e) { if(e.target.id==='overlay-bounce') closeBounceModal(); }
-function onBounceEdit() {
-  const set = bounceTextToSet(document.getElementById('bounce-edit').value);
-  document.getElementById('bounce-edit-count').textContent = set.size;
-}
-function applyBounce() {
-  bounceSet = bounceTextToSet(document.getElementById('bounce-edit').value);
-  closeBounceModal();
-}
-function sortBounce() {
-  const ta = document.getElementById('bounce-edit');
-  const sorted = [...bounceTextToSet(ta.value)].sort();
-  ta.value = sorted.join('\n');
-  document.getElementById('bounce-edit-count').textContent = sorted.length;
-}
-function clearBounce() {
-  document.getElementById('bounce-edit').value = '';
-  document.getElementById('bounce-edit-count').textContent = 0;
+let keywords=[...DEFAULT_KEYWORDS];
+let bounceList=new Set(
+  BOUNCE_LIST_RAW.split('\n')
+    .map(e=>e.trim().toLowerCase())
+    .filter(e=>e && !e.startsWith('//'))
+);
+let validEmails=[],invalidEmails=[],parsedRows=[],csvHeaders=[],currentDomain='all';
+const CHUNK_SIZE=2000;
+let chunks=[],downloadedChunks=new Set(),selectedChunkIdx=-1;
+
+renderKeywords();updateKwBadge();
+// Sync bounce badge + textarea từ hardcoded list
+document.getElementById('bounceCount').textContent=bounceList.size;
+document.getElementById('bounceModalCount').textContent=bounceList.size;
+if(bounceList.size>0) document.getElementById('bounceInput').value=[...bounceList].sort().join('\n');
+
+function switchTab(t){
+  document.getElementById('pane-paste').style.display=t==='paste'?'block':'none';
+  document.getElementById('pane-upload').style.display=t==='upload'?'block':'none';
+  document.getElementById('tab-paste').classList.toggle('active',t==='paste');
+  document.getElementById('tab-upload').classList.toggle('active',t==='upload');
 }
 
-// ── Paste: auto-detect format ─────────────────────────────────
-// Returns {email, name} for each line
-function parsePasteLine(line) {
-  const t = line.trim(); if (!t) return null;
-  // Try separators: comma, semicolon, tab, pipe
-  const seps = [',', ';', '\t', '|'];
-  for (const sep of seps) {
-    const idx = t.indexOf(sep);
-    if (idx > 0) {
-      const a = t.slice(0, idx).trim();
-      const b = t.slice(idx+1).trim();
-      // Figure out which part is email
-      if (a.includes('@') && !b.includes('@')) return { email: a, name: b };
-      if (b.includes('@') && !a.includes('@')) return { email: b, name: a };
-      if (a.includes('@')) return { email: a, name: b }; // both have @, trust first
-    }
-  }
-  // No separator — just email
-  if (t.includes('@')) return { email: t, name: '' };
-  return { email: t, name: '' };
-}
-
-const inputEl = document.getElementById('input-emails');
-inputEl.addEventListener('input', () => {
-  const lines = inputEl.value.split('\n').filter(l => l.trim());
-  document.getElementById('paste-count').textContent = lines.length + ' dòng';
-  // Detect format from first 3 lines
-  const samples = lines.slice(0, 3).map(parsePasteLine).filter(Boolean);
-  const hasName = samples.some(s => s.name);
-  document.getElementById('paste-detect').textContent = hasName ? '✓ Phát hiện: Email + Tên' : lines.length ? '✓ Chỉ email' : '';
+document.getElementById('pasteInput').addEventListener('input',function(){
+  document.getElementById('pasteCount').textContent=this.value.split('\n').filter(l=>l.trim()).length.toLocaleString()+' dòng';
 });
 
-// ── CSV Upload ─────────────────────────────────────────────────
-let csvRows = [], csvHeaders = [];
-const dz = document.getElementById('drop-zone');
-dz.addEventListener('dragover', e=>{e.preventDefault(); dz.classList.add('over');});
-dz.addEventListener('dragleave', ()=>dz.classList.remove('over'));
-dz.addEventListener('drop', e=>{e.preventDefault(); dz.classList.remove('over'); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);});
-function handleFile(i){ if(i.files[0]) processFile(i.files[0]); }
+const dz=document.getElementById('dropzone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');handleFile(e.dataTransfer.files[0])});
+document.getElementById('fileInput').addEventListener('change',e=>handleFile(e.target.files[0]));
 
-function processFile(file) {
-  document.getElementById('file-info').textContent = '📄 '+file.name+' · '+fmtSize(file.size);
-  const bw=document.getElementById('bar-wrap'), bf=document.getElementById('bar-fill');
-  bw.classList.add('on'); bf.style.width='0%';
-  const r = new FileReader();
-  r.onprogress = e => { if(e.lengthComputable) bf.style.width=(e.loaded/e.total*85)+'%'; };
-  r.onload = e => { bf.style.width='100%'; setTimeout(()=>bw.classList.remove('on'),400); parseCSV(e.target.result); };
-  r.readAsText(file, 'UTF-8');
+function handleFile(f){
+  if(!f)return;
+  dz.querySelector('.dropzone-text').innerHTML=`<strong style="color:var(--blue)">${f.name}</strong><br><span style="color:var(--green)">✓ Đã tải · ${(f.size/1024).toFixed(1)} KB</span>`;
+  const r=new FileReader();r.onload=e=>parseCSV(e.target.result);r.readAsText(f,'UTF-8');
 }
-
-function parseCSV(text) {
-  const lines = text.split(/\r?\n/).filter(l=>l.trim());
-  if (!lines.length) return;
-  const ds = [',',';','\t','|'];
-  const cnts = ds.map(d=>(lines[0].match(new RegExp('\\'+d,'g'))||[]).length);
-  const d = ds[cnts.indexOf(Math.max(...cnts))];
-  const first = slCSV(lines[0], d);
-  const hasH = first.some(c=>/email|mail|tên|ten|name|họ|ho/i.test(c));
-  csvHeaders = hasH ? first : first.map((_,i)=>'Cột '+(i+1));
-  csvRows = lines.slice(hasH?1:0).map(l=>slCSV(l,d));
-
-  const selE = document.getElementById('col-email');
-  const selN = document.getElementById('col-name');
-  selE.innerHTML = '<option value="">— Chọn cột —</option>';
-  selN.innerHTML = '<option value="">— Không có —</option>';
-
-  csvHeaders.forEach((h,i)=>{
-    const opt1 = document.createElement('option'); opt1.value=i; opt1.textContent=h+' (cột '+(i+1)+')';
-    if (/email|mail/i.test(h)) opt1.selected = true;
-    selE.appendChild(opt1);
-
-    const opt2 = document.createElement('option'); opt2.value=i; opt2.textContent=h+' (cột '+(i+1)+')';
-    if (/tên|ten|name|họ|ho|first|last/i.test(h)) opt2.selected = true;
-    selN.appendChild(opt2);
-  });
-
-  document.getElementById('col-map-box').classList.add('show');
-  updateColPreview();
-  selE.addEventListener('change', updateColPreview);
-  selN.addEventListener('change', updateColPreview);
-}
-
-function updateColPreview() {
-  if (!csvRows.length) return;
-  const ci = parseInt(document.getElementById('col-email').value);
-  const ni = document.getElementById('col-name').value;
-  const pv = document.getElementById('col-preview');
-  if (isNaN(ci)) { pv.style.display='none'; return; }
-  const sample = csvRows.slice(0,2).map(r=>{
-    const em = r[ci]||''; const nm = ni!==''?r[parseInt(ni)]||'':'';
-    return nm ? em+' → '+nm : em;
-  }).join('  |  ');
-  pv.textContent = 'Xem trước: '+sample;
-  pv.style.display = 'block';
-}
-
-function slCSV(line, d) {
-  const r=[]; let cur='', q=false;
-  for (const ch of line) {
-    if (ch==='"') { q=!q; } else if (ch===d && !q) { r.push(cur.trim()); cur=''; } else { cur+=ch; }
-  }
-  r.push(cur.trim()); return r;
-}
-function fmtSize(b) { return b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(1)+'MB'; }
-
-// ── Name splitting helper ──────────────────────────────────────
-// Vietnamese: last word = first name (given name), rest = last name
-const FALLBACK_NAMES = ['bạn','anh/chị'];
-let _fallbackIdx = 0;
-function nextFallback() { const v = FALLBACK_NAMES[_fallbackIdx % FALLBACK_NAMES.length]; _fallbackIdx++; return v; }
-function splitName(fullName) {
-  const t = (fullName||'').trim();
-  if (!t) {
-    const fn = nextFallback();
-    return { first: fn, last: '' };
-  }
-  const parts = t.split(/\s+/);
-  if (parts.length === 1) return { first: parts[0], last: '' };
-  // Vietnamese convention: last word = first name (given name)
-  const first = parts[parts.length - 1];
-  const last  = parts.slice(0, parts.length - 1).join(' ');
-  return { first, last };
-}
-
-// ── Validation ─────────────────────────────────────────────────
-const DISPOSABLE = new Set(['mailinator.com','guerrillamail.com','temp-mail.org','throwam.com','yopmail.com','sharklasers.com','grr.la','spam4.me','trashmail.com','trashmail.me','dispostable.com','maildrop.cc','tempmail.com','fakeinbox.com']);
-
-function validate(raw, name) {
-  const trim=document.getElementById('opt-trim').checked, lower=document.getElementById('opt-lower').checked;
-  let e = trim ? raw.trim() : raw;
-  if (lower) e = e.toLowerCase();
-  const n = (name||'').trim();
-  if (!e) return {email:e,name:n,ok:false,reason:'Dòng trống',kw:false};
-  const at = e.lastIndexOf('@');
-  if (at<1) return {email:e,name:n,ok:false,reason:'Thiếu @',kw:false};
-  if (at===e.length-1) return {email:e,name:n,ok:false,reason:'Thiếu domain',kw:false};
-  const loc=e.slice(0,at), dom=e.slice(at+1);
-  if (loc.length>64) return {email:e,name:n,ok:false,reason:'Local quá dài',kw:false};
-  if (/^[.\-_]/.test(loc)||/[.\-_]$/.test(loc)) return {email:e,name:n,ok:false,reason:'Ký tự đặc biệt đầu/cuối',kw:false};
-  if (/\.{2,}/.test(loc)) return {email:e,name:n,ok:false,reason:'Dấu chấm liên tiếp',kw:false};
-  if (!/^[a-zA-Z0-9._%+\-]+$/.test(loc)) return {email:e,name:n,ok:false,reason:'Ký tự không hợp lệ',kw:false};
-  if (!dom.includes('.')) return {email:e,name:n,ok:false,reason:'Thiếu TLD',kw:false};
-  const pts=dom.split('.'), tld=pts[pts.length-1];
-  if (tld.length<2||tld.length>24) return {email:e,name:n,ok:false,reason:'TLD không hợp lệ',kw:false};
-  if (!/^[a-zA-Z0-9.\-]+$/.test(dom)) return {email:e,name:n,ok:false,reason:'Domain không hợp lệ',kw:false};
-  if (DISPOSABLE.has(dom.toLowerCase())) return {email:e,name:n,ok:false,reason:'Email tạm thời',kw:false};
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)) return {email:e,name:n,ok:false,reason:'Sai định dạng',kw:false};
-  if (document.getElementById('opt-kw').checked) {
-    const lc = loc.toLowerCase();
-    for (const k of activeKw()) { if (lc.includes(k)) return {email:e,name:n,ok:false,reason:'Từ khoá: "'+k+'"',kw:true}; }
-  }
-  if (document.getElementById('opt-numstart').checked && /^[0-9]/.test(loc)) {
-    return {email:e,name:n,ok:false,reason:'Email bắt đầu bằng số',kw:false};
-  }
-  if (document.getElementById('opt-bounce').checked && bounceSet.has(e.toLowerCase())) {
-    return {email:e,name:n,ok:false,reason:'Bounce list',kw:false};
-  }
-  return {email:e,name:n,firstName:splitName(n).first,lastName:splitName(n).last,ok:true,reason:null,kw:false};
-}
-
-// ── Get lines with name ─────────────────────────────────────────
-function getRecords() {
-  if (document.getElementById('tab-csv').classList.contains('active')) {
-    if (!csvRows.length) return [];
-    const ci = parseInt(document.getElementById('col-email').value);
-    const ni = document.getElementById('col-name').value;
-    if (isNaN(ci)) return [];
-    return csvRows.map(r => ({ rawEmail: r[ci]||'', rawName: ni!=='' ? r[parseInt(ni)]||'' : '' }));
-  }
-  // Paste
-  return inputEl.value.split('\n').map(line => {
-    const parsed = parsePasteLine(line);
-    return parsed ? { rawEmail: parsed.email, rawName: parsed.name } : { rawEmail: '', rawName: '' };
+function parseCSV(text){
+  const lines=text.split('\n').filter(l=>l.trim());if(!lines.length)return;
+  const delim=lines[0].includes('\t')?'\t':',';
+  csvHeaders=lines[0].split(delim).map(h=>h.trim().replace(/^["']|["']$/g,''));
+  parsedRows=lines.slice(1).map(l=>l.split(delim).map(c=>c.trim().replace(/^["']|["']$/g,'')));
+  document.getElementById('colSelectWrap').style.display='grid';
+  const colDefs=[
+    {id:'colEmail',detect:/email|e-mail|mail/i},
+    {id:'colFirstName',detect:/first.?name|tên|fname/i},
+    {id:'colLastName',detect:/last.?name|họ|lname/i},
+    {id:'colCompany',detect:/company|công.?ty|org/i},
+    {id:'colTag',detect:/tag|label|nhãn/i},
+  ];
+  colDefs.forEach(col=>{
+    const sel=document.getElementById(col.id);
+    if(!sel)return;
+    if(col.id==='colEmail')sel.innerHTML='<option value="">— Chọn cột —</option>';
+    else sel.innerHTML='<option value="">— Không có —</option>';
+    csvHeaders.forEach((h,i)=>sel.appendChild(new Option(h,i)));
+    const idx=csvHeaders.findIndex(h=>col.detect.test(h));
+    if(idx>=0)sel.value=idx;
   });
 }
 
-// ── Run ────────────────────────────────────────────────────────
-let aliveList = [], deadList = [];
+function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)}
 
-function run() {
-  const btn=document.getElementById('run-btn'), busy=document.getElementById('busy');
-  btn.disabled=true; busy.classList.add('on');
-  setTimeout(()=>{
-    let results = getRecords()
-      .map(r => validate(r.rawEmail, r.rawName))
-      .filter(r => r.email !== '');
-
-    if (document.getElementById('opt-dedup').checked) {
-      const seen = new Set();
-      results = results.filter(r => { if(seen.has(r.email)) return false; seen.add(r.email); return true; });
-    }
-    aliveList = results.filter(r => r.ok);
-    deadList  = results.filter(r => !r.ok);
-    renderAlive();
-    updateStats();
-    btn.disabled=false; busy.classList.remove('on');
-  }, 20);
+function runFilter(){
+  const btn=document.getElementById('btnRun');
+  document.getElementById('spinner').classList.add('active');
+  document.getElementById('btnText').textContent='⏳ Đang xử lý...';
+  btn.disabled=true;document.getElementById('processingBar').classList.add('active');
+  setTimeout(()=>{doFilter();document.getElementById('spinner').classList.remove('active');document.getElementById('btnText').textContent='⚡ Chạy lọc';btn.disabled=false;document.getElementById('processingBar').classList.remove('active')},300);
 }
 
-// ── Domain filter ──────────────────────────────────────────────
-let activeFilter = 'all', searchDomain = '';
-const FILTER_DOMAINS = {
-  gmail:   ['gmail.com'],
-  outlook: ['outlook.com','hotmail.com','live.com','msn.com'],
-  yahoo:   ['yahoo.com','yahoo.com.vn','ymail.com']
-};
-function getDomain(email) { return (email.split('@')[1]||'').toLowerCase(); }
-function getFilteredList() {
-  return aliveList.filter(r => {
-    const dom = getDomain(r.email);
-    if (searchDomain) return dom.includes(searchDomain.toLowerCase());
-    if (activeFilter==='all') return true;
-    if (activeFilter==='other') return !Object.values(FILTER_DOMAINS).flat().some(d => dom===d);
-    return (FILTER_DOMAINS[activeFilter]||[]).some(d => dom===d);
-  });
-}
-function setFilter(name) {
-  activeFilter=name; searchDomain='';
-  document.getElementById('f-search').value='';
-  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('on'));
-  document.getElementById('fb-'+name).classList.add('on');
-  renderAlive();
-}
-function onSearchInput(val) {
-  searchDomain=val.trim();
-  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('on'));
-  if (!searchDomain) { activeFilter='all'; document.getElementById('fb-all').classList.add('on'); }
-  else activeFilter='';
-  renderAlive();
-}
-function updateFilterCounts() {
-  const c={all:aliveList.length,gmail:0,outlook:0,yahoo:0,other:0};
-  aliveList.forEach(r=>{
-    const dom=getDomain(r.email); let matched=false;
-    for (const [k,ds] of Object.entries(FILTER_DOMAINS)) { if(ds.some(d=>dom===d)){c[k]++;matched=true;} }
-    if (!matched) c.other++;
-  });
-  for (const k of ['all','gmail','outlook','yahoo','other'])
-    document.getElementById('fc-'+k).textContent=c[k];
-}
-
-// ── Virtual scroll ─────────────────────────────────────────────
-const IH=40, BUF=12;
-function renderAlive() {
-  const box=document.getElementById('alive-box'), inner=document.getElementById('alive-inner'), win=document.getElementById('alive-win');
-  const list=getFilteredList();
-  const fResult=document.getElementById('f-result');
-  if (!aliveList.length) {
-    inner.style.height='120px'; win.style.top='0px';
-    win.innerHTML='<div class="empty-box"><div class="icon">📭</div><div>Chưa có dữ liệu</div></div>';
-    box.scrollTop=0; fResult.textContent=''; return;
+function doFilter(){
+  const oT=document.getElementById('optTrim').checked,oD=document.getElementById('optDedup').checked,
+        oL=document.getElementById('optLower').checked,oK=document.getElementById('optKeyword').checked,
+        oB=document.getElementById('optBounce').checked,oN=document.getElementById('optNoDigitStart').checked,
+        isPaste=document.getElementById('tab-paste').classList.contains('active');
+  let rows=[];
+  if(isPaste){
+    const raw=document.getElementById('pasteInput').value.trim();
+    if(!raw){alert('Vui lòng nhập dữ liệu!');return;}
+    rows=raw.split('\n').map(l=>{
+      l=l.trim();if(!l)return null;
+      let p;
+      if(l.includes('\t'))p=l.split('\t');else if(l.includes(','))p=l.split(',');else if(l.includes(';'))p=l.split(';');else p=[l];
+      p=p.map(x=>x.trim());
+      let email='',name='';
+      if(p.length===1){email=p[0];}
+      else if(isValidEmail(p[0])){email=p[0];name=p.slice(1).join(' ').trim();}
+      else if(p.length>1&&isValidEmail(p[1])){email=p[1];name=p[0].trim();}
+      else{email=p[0];name=p.slice(1).join(' ').trim();}
+      return{email,first_name:name,last_name:'',company:'',tag:''};
+    }).filter(Boolean);
+  } else {
+    if(!parsedRows.length){alert('Vui lòng upload file!');return;}
+    const ei=parseInt(document.getElementById('colEmail').value);
+    const fni=document.getElementById('colFirstName').value;
+    const lni=document.getElementById('colLastName').value;
+    const ci=document.getElementById('colCompany').value;
+    const ti=document.getElementById('colTag').value;
+    if(isNaN(ei)){alert('Vui lòng chọn cột Email!');return;}
+    rows=parsedRows.map(r=>({
+      email:r[ei]||'',
+      first_name:fni!==''?(r[parseInt(fni)]||''):'',
+      last_name:lni!==''?(r[parseInt(lni)]||''):'',
+      company:ci!==''?(r[parseInt(ci)]||''):'',
+      tag:ti!==''?(r[parseInt(ti)]||''):'',
+    }));
   }
-  if (!list.length) {
-    inner.style.height='80px'; win.style.top='0px';
-    win.innerHTML='<div class="empty-box"><div>Không tìm thấy</div></div>';
-    fResult.textContent='0 kết quả'; return;
+  validEmails=[];invalidEmails=[];const seen=new Set();
+  for(const row of rows){
+    let email=row.email;
+    const first_name=row.first_name||'',last_name=row.last_name||'',company=row.company||'',tag=row.tag||'';
+    if(oT)email=email.trim();if(oL)email=email.toLowerCase();
+    if(!email){invalidEmails.push({email:'(trống)',first_name,last_name,reason:'Trống'});continue}
+    if(!isValidEmail(email)){invalidEmails.push({email,first_name,last_name,reason:'Sai định dạng'});continue}
+    if(oD&&seen.has(email)){invalidEmails.push({email,first_name,last_name,reason:'Trùng lặp'});continue}
+    if(oN&&/^\d/.test(email.split('@')[0])){invalidEmails.push({email,first_name,last_name,reason:'Bắt đầu bằng số'});continue}
+    if(oK){const local=email.split('@')[0].toLowerCase();const m=keywords.find(k=>local.includes(k.toLowerCase()));if(m){invalidEmails.push({email,first_name,last_name,reason:'Từ khoá: '+m});continue}}
+    if(oB&&bounceList.has(email)){invalidEmails.push({email,first_name,last_name,reason:'Bounce'});continue}
+    seen.add(email);validEmails.push({email,first_name,last_name,company,tag});
   }
-  const isFiltered=searchDomain||(activeFilter&&activeFilter!=='all');
-  fResult.textContent=isFiltered?list.length.toLocaleString()+' kết quả':'';
-  inner.style.height=(list.length*IH)+'px';
-  box.scrollTop=0; paintAlive(list,0);
-}
-function paintAlive(list,scrollTop) {
-  if (!list) list=getFilteredList();
-  const win=document.getElementById('alive-win');
-  const s=Math.max(0,Math.floor(scrollTop/IH)-BUF);
-  const e=Math.min(list.length,Math.ceil((scrollTop+290)/IH)+BUF);
-  win.style.top=(s*IH)+'px';
-  win.innerHTML=list.slice(s,e).map(item=>`
-    <div class="email-row">
-      <div class="dot"></div>
-      <span class="eaddr">${esc(item.email)}</span>
-      <span class="ename ${item.name?'has-name':''}">${item.name ? esc(item.name) : '<span style="color:var(--muted);font-size:0.6rem">—</span>'}</span>
-    </div>`
-  ).join('');
-}
-function vsScroll() {
-  const box=document.getElementById('alive-box'), list=getFilteredList();
-  if (list.length) paintAlive(list,box.scrollTop);
+  updateStats(rows.length);renderResults();buildChunks();
 }
 
-// ── Stats ──────────────────────────────────────────────────────
-function updateStats() {
-  const a=aliveList.length, d=deadList.length, t=a+d, r=t?Math.round(a/t*100):0;
-  document.getElementById('s-total').textContent=t.toLocaleString();
-  document.getElementById('s-alive').textContent=a.toLocaleString();
-  document.getElementById('s-dead').textContent=d.toLocaleString();
-  document.getElementById('s-rate').textContent=t?r+'%':'—';
-  document.getElementById('s-bar').style.width=r+'%';
-  document.getElementById('alive-badge').textContent=a.toLocaleString();
-  document.getElementById('dead-badge').textContent=d.toLocaleString();
-  updateFilterCounts();
+function updateStats(total){
+  document.getElementById('statTotal').textContent=total.toLocaleString();
+  document.getElementById('statValid').textContent=validEmails.length.toLocaleString();
+  document.getElementById('statInvalid').textContent=invalidEmails.length.toLocaleString();
+  document.getElementById('statRate').textContent=total>0?Math.round(validEmails.length/total*100)+'%':'—';
+}
+function countDomain(arr,type){
+  if(type==='all')return arr.length;
+  if(type==='gmail')return arr.filter(r=>r.email.includes('@gmail.')).length;
+  if(type==='outlook')return arr.filter(r=>/outlook|hotmail|live\./.test(r.email)).length;
+  if(type==='yahoo')return arr.filter(r=>r.email.includes('@yahoo.')).length;
+  return arr.filter(r=>!r.email.includes('@gmail.')&&!/outlook|hotmail|live\./.test(r.email)&&!r.email.includes('@yahoo.')).length;
+}
+function filterDomain(type,btn){currentDomain=type;document.querySelectorAll('.domain-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderValidList()}
+function getFiltered(){
+  if(currentDomain==='all')return validEmails;
+  if(currentDomain==='gmail')return validEmails.filter(r=>r.email.includes('@gmail.'));
+  if(currentDomain==='outlook')return validEmails.filter(r=>/outlook|hotmail|live\./.test(r.email));
+  if(currentDomain==='yahoo')return validEmails.filter(r=>r.email.includes('@yahoo.'));
+  return validEmails.filter(r=>!r.email.includes('@gmail.')&&!/outlook|hotmail|live\./.test(r.email)&&!r.email.includes('@yahoo.'));
+}
+function renderResults(){
+  document.getElementById('dAll').textContent=validEmails.length;
+  document.getElementById('dGmail').textContent=countDomain(validEmails,'gmail');
+  document.getElementById('dOutlook').textContent=countDomain(validEmails,'outlook');
+  document.getElementById('dYahoo').textContent=countDomain(validEmails,'yahoo');
+  document.getElementById('dOther').textContent=countDomain(validEmails,'other');
+  document.getElementById('validCount').textContent=validEmails.length.toLocaleString();
+  document.getElementById('invalidCount').textContent=invalidEmails.length.toLocaleString();
+  renderValidList();
+}
+function renderValidList(){
+  const f=getFiltered(),el=document.getElementById('validList');
+  if(!f.length){el.innerHTML='<div class="empty"><div class="empty-icon">📭</div>Chưa có dữ liệu</div>';return}
+  el.innerHTML=f.slice(0,500).map(r=>{
+    const fullName=[r.first_name,r.last_name].filter(Boolean).join(' ');
+    return `<div class="email-item"><span class="em">${r.email}</span>${fullName?`<span class="nm">· ${fullName}</span>`:''}</div>`;
+  }).join('')+(f.length>500?`<div class="email-item" style="color:var(--muted)">... và ${(f.length-500).toLocaleString()} email nữa</div>`:'');
 }
 
-// ── Export ─────────────────────────────────────────────────────
-function copyAlive() {
-  const list=getFilteredList(); if(!list.length) return;
-  _fallbackIdx = 0;
-  // Tab-separated: Email [TAB] first_name [TAB] last_name → 3 cột trong Google Sheet
-  const text = list.map(r => {
-    const fn = r.firstName || nextFallback();
-    const ln = r.lastName  || '';
-    return (r.email||'') + '\t' + fn + '\t' + ln;
-  }).join('\n');
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn=document.getElementById('btn-copy'); const old=btn.textContent;
-    btn.textContent='✓ Đã sao chép!'; setTimeout(()=>btn.textContent=old,1800);
+function buildChunks(){
+  chunks=[];downloadedChunks=new Set();selectedChunkIdx=-1;
+  for(let i=0;i<validEmails.length;i+=CHUNK_SIZE)chunks.push(validEmails.slice(i,i+CHUNK_SIZE));
+  const sec=document.getElementById('chunkSection');
+  if(!chunks.length){sec.style.display='none';return}
+  sec.style.display='block';sec.classList.add('fade-in');
+  renderChunkUI();
+}
+function renderChunkUI(){
+  updateChunkSubtitle();
+  const sel=document.getElementById('chunkSelect');
+  sel.innerHTML='<option value="">— Chọn tệp để tải —</option>';
+  chunks.forEach((ch,i)=>{
+    const done=downloadedChunks.has(i),s=i*CHUNK_SIZE+1,e=Math.min((i+1)*CHUNK_SIZE,validEmails.length);
+    sel.innerHTML+=`<option value="${i}">${done?'✓ ':'○ '}Tệp ${i+1}/${chunks.length} — ${ch.length.toLocaleString()} email (${s.toLocaleString()}–${e.toLocaleString()})${done?' [Đã tải]':''}</option>`;
   });
+  if(selectedChunkIdx>=0)sel.value=selectedChunkIdx;
+  document.getElementById('chunkGrid').innerHTML=chunks.map((ch,i)=>{
+    const done=downloadedChunks.has(i),isSel=selectedChunkIdx===i;
+    return `<button class="chunk-btn ${done?'done':''} ${isSel?'selected':''}" onclick="clickChunk(${i})">
+      <div class="chunk-btn-num">${done?'✅':'📄'} Tệp ${i+1}</div>
+      <div class="chunk-btn-count">${ch.length.toLocaleString()} email</div>
+      ${done?'<div class="chunk-done-tag">ĐÃ TẢI</div>':''}
+    </button>`;
+  }).join('');
+  document.getElementById('btnDownloadSelected').disabled=selectedChunkIdx<0;
+  updateProgress();
 }
-function downloadAlive() {
-  const list=getFilteredList(); if(!list.length) return;
-  _fallbackIdx = 0;
-  const rows = list.map(r => {
-    const fn = r.firstName || nextFallback();
-    const ln = r.lastName  || '';
-    return csvEscape(r.email)+','+csvEscape(fn)+','+csvEscape(ln)+',,';
-  });
-  const csv = 'email,first_name,last_name,company,tag\n' + rows.join('\n');
-  const tag=searchDomain||(activeFilter&&activeFilter!=='all'?activeFilter:'hop_le');
-  dl(csv,'email_'+tag+'_'+Date.now()+'.csv');
+function updateChunkSubtitle(){document.getElementById('chunkSubtitle').textContent=`${chunks.length} TỆP · ${validEmails.length.toLocaleString()} EMAIL HỢP LỆ · ĐÃ TẢI: ${downloadedChunks.size}/${chunks.length}`}
+function updateProgress(){const p=chunks.length>0?Math.round(downloadedChunks.size/chunks.length*100):0;document.getElementById('progressFill').style.width=p+'%';document.getElementById('progressText').textContent=p+'%'}
+function selectChunk(val){selectedChunkIdx=val!==''?parseInt(val):-1;renderChunkUI()}
+function clickChunk(i){selectedChunkIdx=i;downloadChunk(i)}
+function downloadSelected(){if(selectedChunkIdx<0)return;downloadChunk(selectedChunkIdx)}
+function downloadChunk(i){
+  const ch=chunks[i];if(!ch)return;
+  const header='email,first_name,last_name,company,tag';
+  const body=ch.map(r=>`${r.email},${r.first_name||''},${r.last_name||''},${r.company||''},${r.tag||''}`).join('\n');
+  triggerDownload(header+'\n'+body,`email_list_part${i+1}_of${chunks.length}.csv`);
+  downloadedChunks.add(i);renderChunkUI();
 }
-function downloadDead() {
-  if(!deadList.length) return;
-  dl('email,first_name,last_name,ly_do\n'+deadList.map(r=>csvEscape(r.email)+','+csvEscape(r.firstName||r.name||'')+','+csvEscape(r.lastName||'')+','+csvEscape(r.reason)).join('\n'),'email_bi_loai_'+Date.now()+'.csv');
+function downloadAllChunks(){chunks.forEach((_,i)=>setTimeout(()=>downloadChunk(i),i*120))}
+function downloadValidCSV(){
+  if(!validEmails.length)return;
+  const header='email,first_name,last_name,company,tag';
+  const body=validEmails.map(r=>`${r.email},${r.first_name||''},${r.last_name||''},${r.company||''},${r.tag||''}`).join('\n');
+  triggerDownload(header+'\n'+body,'email_valid_all.csv');
 }
-function csvEscape(v='') { const s=String(v); return (s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s; }
-function dl(content,name) {
-  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'})),download:name});
-  a.click();
+function downloadInvalidCSV(){
+  if(!invalidEmails.length)return;
+  const header='email,first_name,last_name,reason';
+  const body=invalidEmails.map(r=>`${r.email},${r.first_name||''},${r.last_name||''},${r.reason}`).join('\n');
+  triggerDownload(header+'\n'+body,'email_invalid.csv');
 }
-
-function clearAll() {
-  inputEl.value=''; csvRows=[]; csvHeaders=[]; aliveList=[]; deadList=[];
-  activeFilter='all'; searchDomain='';
-  document.getElementById('f-search').value='';
-  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('on'));
-  document.getElementById('fb-all').classList.add('on');
-  document.getElementById('f-result').textContent='';
-  document.getElementById('paste-count').textContent='0 dòng';
-  document.getElementById('paste-detect').textContent='';
-  document.getElementById('file-info').textContent='';
-  document.getElementById('col-map-box').classList.remove('show');
-  document.getElementById('col-preview').style.display='none';
-  renderAlive(); updateStats();
+function triggerDownload(content,filename){const b=new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=filename;a.click();URL.revokeObjectURL(u)}
+function copyValidEmails(){
+  if(!validEmails.length)return;
+  // Tab-separated so it pastes into Excel/Sheets as separate columns
+  const header='email\tfirst_name\tlast_name\tcompany\ttag';
+  const body=validEmails.map(r=>[r.email,r.first_name||'',r.last_name||'',r.company||'',r.tag||''].join('\t')).join('\n');
+  navigator.clipboard.writeText(header+'\n'+body).then(()=>alert(`✓ Đã sao chép ${validEmails.length.toLocaleString()} email (dạng bảng, paste thẳng vào Excel/Sheets)`));
 }
-
-function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-// ── Demo ───────────────────────────────────────────────────────
-// Demo dùng tab (giống Excel copy/paste)
-inputEl.value=[
-  'law_park@yahoo.com\tKatashi Hoàng Duy',
-  'tranthuytuyetlan@gmail.com\tTuyet Lan Tran Thuy',
-  'ms.nguyen89@yahoo.com\tNguyễn Diễm My',
-  'lephuonganh.dn@gmail.com\tPhương Anh Lê',
-  'vienluu.ketoan@gmail.com\tLuu Vien',
-  'gaume937@gmail.com\tLê Hà',
-  'slimkoi@yahoo.com\tNguyen Duy',
-  'thanhbinh.le.hvp@gmail.com\tAn Lê',
-  'kieuminhthanh00@gmail.com\tKieu Thanh',
-  'duyennbk97@gmail.com\tMỹ Duyên Trần Phước',
-].join('\n');
-inputEl.dispatchEvent(new Event('input'));
-run();
-updateBounceChip();
+function clearAll(){
+  document.getElementById('pasteInput').value='';document.getElementById('pasteCount').textContent='0 dòng';
+  validEmails=[];invalidEmails=[];parsedRows=[];csvHeaders=[];chunks=[];downloadedChunks=new Set();selectedChunkIdx=-1;
+  updateStats(0);
+  document.getElementById('validList').innerHTML='<div class="empty"><div class="empty-icon">📭</div>Chưa có dữ liệu</div>';
+  document.getElementById('validCount').textContent='0';document.getElementById('invalidCount').textContent='0';
+  ['dAll','dGmail','dOutlook','dYahoo','dOther'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('chunkSection').style.display='none';
+}
+function renderKeywords(){document.getElementById('kwList').innerHTML=keywords.map(k=>`<span class="kw-tag" onclick="removeKeyword('${k}')" title="Click để xoá">${k}</span>`).join('');document.getElementById('kwModalCount').textContent=keywords.length}
+function removeKeyword(k){keywords=keywords.filter(x=>x!==k);renderKeywords()}
+function sortKeywords(){keywords.sort();renderKeywords()}
+function resetKeywords(){keywords=[...DEFAULT_KEYWORDS];renderKeywords()}
+function applyKeywords(){const raw=document.getElementById('kwInput').value;if(raw.trim()){const nk=raw.split(/[\n,]+/).map(k=>k.trim().toLowerCase()).filter(k=>k&&!keywords.includes(k));keywords.push(...nk);document.getElementById('kwInput').value=''}renderKeywords();updateKwBadge();closeModal('kw')}
+function updateKwBadge(){document.getElementById('kwCount').textContent=keywords.length}
+function applyBounce(){
+  const raw=document.getElementById('bounceInput').value;
+  bounceList=new Set(raw.split('\n').map(e=>e.trim().toLowerCase()).filter(e=>e&&!e.startsWith('//')));
+  document.getElementById('bounceCount').textContent=bounceList.size;
+  document.getElementById('bounceModalCount').textContent=bounceList.size;
+  closeModal('bounce');
+}
+function sortBounce(){document.getElementById('bounceInput').value=[...bounceList].sort().join('\n')}
+function clearBounce(){document.getElementById('bounceInput').value='';bounceList=new Set();document.getElementById('bounceCount').textContent='0';document.getElementById('bounceModalCount').textContent='0'}
+function openModal(name){if(name==='kw')renderKeywords();document.getElementById('modal-'+name).classList.add('open')}
+function closeModal(name){document.getElementById('modal-'+name).classList.remove('open');if(name==='kw')updateKwBadge()}
+document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')})});
 </script>
 </body>
 </html>
